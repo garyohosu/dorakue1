@@ -1,0 +1,279 @@
+import Phaser from 'phaser';
+import { playCancel, playConfirm } from '../audio/sfx.js';
+import { GAME_HEIGHT, GAME_WIDTH, SCENE_KEYS, TILE_SIZE, TILE_TYPES } from '../game/constants.js';
+import { TEXTURE_KEYS } from '../game/pixelTextures.js';
+import { createInitialPlayer } from '../data/player.js';
+import { getMap } from '../data/maps.js';
+
+const DIRECTIONS = {
+  up: { x: 0, y: -1 },
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 }
+};
+
+function safelyPlay(fn) {
+  try {
+    fn();
+  } catch (error) {
+    console.warn('Audio playback skipped:', error);
+  }
+}
+
+export default class FieldScene extends Phaser.Scene {
+  constructor() {
+    super(SCENE_KEYS.FIELD);
+    this.nextMoveAt = 0;
+  }
+
+  create(data = {}) {
+    this.nextMoveAt = 0;
+    this.player = data.player ? { ...createInitialPlayer(), ...data.player } : createInitialPlayer();
+    this.map = getMap(this.player.mapId);
+    this.blockMarker = null;
+
+    this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x0a101a).setOrigin(0);
+    this.drawMap();
+    this.createPlayerSprite();
+    this.createStatusWindow();
+    this.createNoticeText();
+    this.setupInput();
+    this.publishDebugState();
+  }
+
+  drawMap() {
+    this.map.tiles.forEach((row, y) => {
+      row.forEach((tileId, x) => {
+        const tile = TILE_TYPES[tileId];
+        const px = x * TILE_SIZE;
+        const py = y * TILE_SIZE;
+
+        this.add.image(px, py, tile.textureKey).setOrigin(0);
+        this.add.rectangle(px, py, TILE_SIZE, TILE_SIZE, 0x000000, 0)
+          .setOrigin(0)
+          .setStrokeStyle(1, 0x111827, 0.2);
+      });
+    });
+  }
+
+  createPlayerSprite() {
+    const { x, y } = this.tileToWorld(this.player.x, this.player.y);
+    this.playerSprite = this.add.image(x, y, this.getPlayerTexture())
+      .setDepth(10);
+  }
+
+  createStatusWindow() {
+    this.add.rectangle(464, 12, 164, 156, 0x05070d, 0.9)
+      .setOrigin(0)
+      .setStrokeStyle(2, 0xf8f1d8)
+      .setDepth(20);
+
+    this.statusText = this.add.text(478, 24, this.getStatusText(), {
+      fontFamily: 'monospace',
+      fontSize: '14px',
+      color: '#ffffff',
+      lineSpacing: 5
+    }).setDepth(21);
+  }
+
+  createNoticeText() {
+    this.noticeText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 26, '', {
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      color: '#fff2b0',
+      backgroundColor: '#05070dcc',
+      padding: { x: 10, y: 4 }
+    }).setOrigin(0.5).setDepth(30);
+  }
+
+  setupInput() {
+    this.input.keyboard.on('keydown', this.handleKeyDown, this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.input.keyboard.off('keydown', this.handleKeyDown, this);
+    });
+  }
+
+  handleKeyDown(event) {
+    event.preventDefault();
+
+    if (event.code === 'ArrowUp' || event.code === 'KeyW') {
+      this.tryMove('up');
+    } else if (event.code === 'ArrowDown' || event.code === 'KeyS') {
+      this.tryMove('down');
+    } else if (event.code === 'ArrowLeft' || event.code === 'KeyA') {
+      this.tryMove('left');
+    } else if (event.code === 'ArrowRight' || event.code === 'KeyD') {
+      this.tryMove('right');
+    } else if (this.isConfirm(event)) {
+      this.interact();
+    } else if (event.code === 'Escape' || event.code === 'KeyX') {
+      safelyPlay(playCancel);
+    }
+  }
+
+  isConfirm(event) {
+    return event.code === 'Enter' || event.code === 'Space' || event.code === 'KeyZ';
+  }
+
+  tryMove(direction) {
+    const now = this.time.now;
+    if (now < this.nextMoveAt) return;
+    this.nextMoveAt = now + 120;
+
+    const delta = DIRECTIONS[direction];
+    const target = {
+      x: this.player.x + delta.x,
+      y: this.player.y + delta.y
+    };
+
+    this.player.direction = direction;
+
+    if (!this.canMoveTo(target.x, target.y)) {
+      this.showBlocked(target.x, target.y);
+      safelyPlay(playCancel);
+      return;
+    }
+
+    this.player.x = target.x;
+    this.player.y = target.y;
+    this.updatePlayerSprite();
+    this.noticeText.setText('');
+    this.publishDebugState();
+
+    this.tryTransitionAt(this.player.x, this.player.y);
+  }
+
+  interact() {
+    if (this.tryTransitionAt(this.player.x, this.player.y)) return;
+
+    const facing = this.getFacingPosition();
+    if (this.tryTransitionAt(facing.x, facing.y)) return;
+
+    safelyPlay(playCancel);
+  }
+
+  canMoveTo(x, y) {
+    if (x < 0 || y < 0 || x >= this.map.width || y >= this.map.height) {
+      return false;
+    }
+
+    const tileId = this.map.tiles[y][x];
+    return TILE_TYPES[tileId]?.passable === true;
+  }
+
+  tryTransitionAt(x, y) {
+    const transition = this.findTransitionAt(x, y);
+    if (!transition) return false;
+
+    this.goToMap(transition);
+    return true;
+  }
+
+  findTransitionAt(x, y) {
+    const transitions = [
+      ...(this.map.entrances ?? []),
+      ...(this.map.exits ?? [])
+    ];
+
+    return transitions.find((transition) => transition.x === x && transition.y === y);
+  }
+
+  goToMap(transition) {
+    const targetMap = getMap(transition.targetMapId);
+
+    this.player.mapId = targetMap.id;
+    this.player.x = transition.targetX;
+    this.player.y = transition.targetY;
+    this.player.direction = transition.targetDirection ?? this.player.direction;
+
+    safelyPlay(playConfirm);
+    this.scene.restart({ player: this.player });
+  }
+
+  showBlocked(x, y) {
+    this.noticeText.setText('\u305d\u3053\u3078\u306f\u9032\u3081\u306a\u3044\u3002');
+
+    if (this.blockMarker) {
+      this.blockMarker.destroy();
+      this.blockMarker = null;
+    }
+
+    if (x >= 0 && y >= 0 && x < this.map.width && y < this.map.height) {
+      this.blockMarker = this.add.rectangle(
+        x * TILE_SIZE,
+        y * TILE_SIZE,
+        TILE_SIZE,
+        TILE_SIZE,
+        0xffffff,
+        0.22
+      ).setOrigin(0).setDepth(8);
+
+      this.time.delayedCall(120, () => {
+        if (this.blockMarker) {
+          this.blockMarker.destroy();
+          this.blockMarker = null;
+        }
+      });
+    }
+
+    this.publishDebugState();
+  }
+
+  updatePlayerSprite() {
+    const { x, y } = this.tileToWorld(this.player.x, this.player.y);
+    this.playerSprite.setPosition(x, y);
+    this.playerSprite.setTexture(this.getPlayerTexture());
+    this.statusText.setText(this.getStatusText());
+  }
+
+  tileToWorld(tileX, tileY) {
+    return {
+      x: tileX * TILE_SIZE + TILE_SIZE / 2,
+      y: tileY * TILE_SIZE + TILE_SIZE / 2
+    };
+  }
+
+  getFacingPosition() {
+    const delta = DIRECTIONS[this.player.direction] ?? DIRECTIONS.down;
+    return {
+      x: this.player.x + delta.x,
+      y: this.player.y + delta.y
+    };
+  }
+
+  getStatusText() {
+    return [
+      `\u73fe\u5728\u5730: ${this.map.name}`,
+      this.player.name,
+      `Lv ${this.player.level}`,
+      `HP ${this.player.hp}/${this.player.maxHp}`,
+      `MP ${this.player.mp}/${this.player.maxMp}`,
+      `${this.player.gold}\u30ea\u30e0`
+    ].join('\n');
+  }
+
+  getPlayerTexture() {
+    const textureByDirection = {
+      up: TEXTURE_KEYS.PLAYER_UP,
+      down: TEXTURE_KEYS.PLAYER_DOWN,
+      left: TEXTURE_KEYS.PLAYER_LEFT,
+      right: TEXTURE_KEYS.PLAYER_RIGHT
+    };
+
+    return textureByDirection[this.player.direction] ?? TEXTURE_KEYS.PLAYER_DOWN;
+  }
+
+  publishDebugState() {
+    if (!import.meta.env.DEV) return;
+    window.__dorakueDebug = {
+      scene: 'FieldScene',
+      mapId: this.map.id,
+      mapName: this.map.name,
+      player: {
+        x: this.player.x,
+        y: this.player.y,
+        direction: this.player.direction
+      }
+    };
+  }
+}

@@ -1,0 +1,19 @@
+import { MAP_IDS } from '../game/constants.js';
+
+export const INITIAL_PLAYER = {
+  name: '\u30a2\u30ec\u30f3',
+  level: 1,
+  hp: 24,
+  maxHp: 24,
+  mp: 6,
+  maxMp: 6,
+  gold: 80,
+  mapId: MAP_IDS.WORLD,
+  x: 4,
+  y: 3,
+  direction: 'down'
+};
+
+export function createInitialPlayer() {
+  return JSON.parse(JSON.stringify(INITIAL_PLAYER));
+}
