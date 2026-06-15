@@ -11,7 +11,11 @@ export const INITIAL_PLAYER = {
   mapId: MAP_IDS.WORLD,
   x: 4,
   y: 3,
-  direction: 'down'
+  direction: 'down',
+  flags: {
+    acceptedQuest: false,
+    seenInitialHint: false
+  }
 };
 
 export function createInitialPlayer() {

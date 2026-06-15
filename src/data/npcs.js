@@ -1,0 +1,86 @@
+import { MAP_IDS } from '../game/constants.js';
+import { TEXTURE_KEYS } from '../game/pixelTextures.js';
+
+export const NPCS = [
+  {
+    id: 'king',
+    name: '\u30bb\u30ea\u30aa\u30eb\u738b',
+    mapId: MAP_IDS.CASTLE,
+    x: 10,
+    y: 4,
+    textureKey: TEXTURE_KEYS.NPC_KING,
+    dialogue: [
+      '\u30a2\u30ec\u30f3\u3088\u3002\u9577\u3044\u591c\u3092\u7d42\u308f\u3089\u305b\u308b\u6642\u304c\u6765\u305f\u3002',
+      '\u307e\u305a\u306f\u59cb\u307e\u308a\u306e\u753a\u3078\u884c\u304d\u3001\u4eba\u3005\u306e\u8a71\u3092\u805e\u304f\u306e\u3060\u3002',
+      '\u5317\u6771\u306e\u68ee\u306b\u3001\u6708\u306e\u3057\u308b\u3057\u3092\u6301\u3064\u6d1e\u304c\u3042\u308b\u3068\u3044\u3046\u3002'
+    ],
+    acceptedDialogue: [
+      '\u59cb\u307e\u308a\u306e\u753a\u3067\u624b\u304c\u304b\u308a\u3092\u63a2\u3059\u306e\u3060\u3002',
+      '\u5317\u6771\u306e\u68ee\u306b\u5411\u304b\u3046\u524d\u306b\u3001\u753a\u306e\u8005\u306e\u8a71\u3092\u805e\u304f\u3068\u3088\u3044\u3002'
+    ]
+  },
+  {
+    id: 'minato',
+    name: '\u8a18\u9332\u4fc2\u30df\u30ca\u30c8',
+    mapId: MAP_IDS.CASTLE,
+    x: 9,
+    y: 13,
+    textureKey: TEXTURE_KEYS.NPC_KEEPER,
+    dialogue: [
+      '\u65c5\u306e\u8a18\u9332\u306f\u3001\u307e\u3060\u6e96\u5099\u4e2d\u3067\u3059\u3002',
+      '\u4eca\u306f\u5fc3\u306b\u523b\u3093\u3067\u304a\u304d\u307e\u3057\u3087\u3046\u3002'
+    ]
+  },
+  {
+    id: 'castle_guard',
+    name: '\u57ce\u306e\u5175\u58eb',
+    mapId: MAP_IDS.CASTLE,
+    x: 11,
+    y: 13,
+    textureKey: TEXTURE_KEYS.NPC_GUARD,
+    dialogue: [
+      '\u753a\u3078\u5411\u304b\u3046\u306a\u3089\u3001\u5357\u306e\u9053\u3092\u9032\u3080\u3068\u3088\u3044\u3002',
+      '\u5c71\u3068\u6c34\u306b\u306f\u9032\u3081\u306c\u3002\u9053\u3092\u63a2\u3059\u306e\u3060\u3002'
+    ]
+  },
+  {
+    id: 'town_person',
+    name: '\u753a\u4eba',
+    mapId: MAP_IDS.TOWN,
+    x: 9,
+    y: 13,
+    textureKey: TEXTURE_KEYS.NPC_TOWNSPERSON,
+    dialogue: [
+      '\u5317\u6771\u306e\u68ee\u306b\u306f\u3001\u53e4\u3044\u6d1e\u304c\u3042\u308b\u305d\u3046\u3067\u3059\u3002',
+      '\u8fd1\u3054\u308d\u3001\u591c\u306b\u306a\u308b\u3068\u9752\u3044\u5149\u304c\u898b\u3048\u308b\u3068\u304b\u3002'
+    ]
+  },
+  {
+    id: 'merchant',
+    name: '\u5546\u4eba',
+    mapId: MAP_IDS.TOWN,
+    x: 11,
+    y: 13,
+    textureKey: TEXTURE_KEYS.NPC_MERCHANT,
+    dialogue: [
+      '\u5e97\u306f\u307e\u3060\u6e96\u5099\u4e2d\u3067\u3059\u3002',
+      '\u3067\u3082\u3001\u65c5\u306b\u51fa\u308b\u306a\u3089\u5c0f\u7652\u3057\u8349\u306f\u5927\u4e8b\u3067\u3059\u3088\u3002'
+    ]
+  },
+  {
+    id: 'elder',
+    name: '\u8001\u4eba',
+    mapId: MAP_IDS.TOWN,
+    x: 10,
+    y: 11,
+    textureKey: TEXTURE_KEYS.NPC_ELDER,
+    dialogue: [
+      '\u6025\u304c\u3070\u56de\u308c\u3058\u3083\u3002',
+      '\u68ee\u306e\u5965\u3078\u884c\u304f\u524d\u306b\u3001\u753a\u3067\u8a71\u3092\u805e\u304f\u304c\u3088\u3044\u3002'
+    ]
+  }
+];
+
+export function getNpcsForMap(mapId) {
+  return NPCS.filter((npc) => npc.mapId === mapId);
+}

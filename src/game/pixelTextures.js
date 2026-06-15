@@ -14,7 +14,13 @@ export const TEXTURE_KEYS = {
   TILE_THRONE: 'tile_throne',
   TILE_HOUSE_FLOOR: 'tile_house_floor',
   LOCATION_CASTLE: 'location_castle',
-  LOCATION_TOWN: 'location_town'
+  LOCATION_TOWN: 'location_town',
+  NPC_KING: 'npc_king',
+  NPC_KEEPER: 'npc_keeper',
+  NPC_GUARD: 'npc_guard',
+  NPC_TOWNSPERSON: 'npc_townsperson',
+  NPC_MERCHANT: 'npc_merchant',
+  NPC_ELDER: 'npc_elder'
 };
 
 const SIZE = 32;
@@ -36,6 +42,12 @@ export function registerPixelTextures(scene) {
   createTexture(scene, TEXTURE_KEYS.PLAYER_UP, (ctx) => drawPlayer(ctx, 'up'));
   createTexture(scene, TEXTURE_KEYS.PLAYER_LEFT, (ctx) => drawPlayer(ctx, 'left'));
   createTexture(scene, TEXTURE_KEYS.PLAYER_RIGHT, (ctx) => drawPlayer(ctx, 'right'));
+  createTexture(scene, TEXTURE_KEYS.NPC_KING, drawKing);
+  createTexture(scene, TEXTURE_KEYS.NPC_KEEPER, drawKeeper);
+  createTexture(scene, TEXTURE_KEYS.NPC_GUARD, drawGuard);
+  createTexture(scene, TEXTURE_KEYS.NPC_TOWNSPERSON, drawTownsperson);
+  createTexture(scene, TEXTURE_KEYS.NPC_MERCHANT, drawMerchant);
+  createTexture(scene, TEXTURE_KEYS.NPC_ELDER, drawElder);
 }
 
 function createTexture(scene, key, draw) {
@@ -257,4 +269,112 @@ function drawPlayer(ctx, direction) {
   rect(ctx, 17, 27, 3, 4, '#2b3038');
   rect(ctx, 10, 31, 5, 1, '#15191f');
   rect(ctx, 17, 31, 5, 1, '#15191f');
+}
+
+function drawNpcBase(ctx, palette) {
+  rect(ctx, 0, 0, SIZE, SIZE, 'rgba(0, 0, 0, 0)');
+  rect(ctx, 9, 28, 14, 3, 'rgba(0, 0, 0, 0.28)');
+
+  rect(ctx, 11, 6, 10, 4, palette.hair);
+  rect(ctx, 9, 10, 14, 5, palette.hair);
+  rect(ctx, 10, 13, 12, 6, palette.skin);
+  rect(ctx, 13, 15, 2, 2, '#1d2530');
+  rect(ctx, 17, 15, 2, 2, '#1d2530');
+
+  rect(ctx, 10, 19, 12, 8, palette.body);
+  rect(ctx, 8, 20, 3, 7, palette.dark);
+  rect(ctx, 21, 20, 3, 7, palette.dark);
+  rect(ctx, 12, 27, 3, 4, palette.legs);
+  rect(ctx, 17, 27, 3, 4, palette.legs);
+}
+
+function drawKing(ctx) {
+  drawNpcBase(ctx, {
+    hair: '#6f5134',
+    skin: '#d9a47f',
+    body: '#7f3555',
+    dark: '#4c2238',
+    legs: '#2b2734'
+  });
+
+  rect(ctx, 10, 4, 3, 4, '#d9b348');
+  rect(ctx, 15, 2, 3, 6, '#f1d46f');
+  rect(ctx, 20, 4, 3, 4, '#d9b348');
+  rect(ctx, 10, 8, 13, 2, '#c99b35');
+  rect(ctx, 13, 20, 6, 6, '#f0d36c');
+  rect(ctx, 15, 21, 2, 4, '#fff1a1');
+}
+
+function drawKeeper(ctx) {
+  drawNpcBase(ctx, {
+    hair: '#263448',
+    skin: '#d8a47e',
+    body: '#3f7c72',
+    dark: '#2d5b56',
+    legs: '#28343c'
+  });
+
+  rect(ctx, 7, 22, 4, 7, '#233b44');
+  rect(ctx, 21, 22, 4, 7, '#233b44');
+  rect(ctx, 13, 20, 6, 2, '#d9c27c');
+  rect(ctx, 14, 23, 4, 3, '#f4e7a1');
+}
+
+function drawGuard(ctx) {
+  drawNpcBase(ctx, {
+    hair: '#5b626c',
+    skin: '#d4a078',
+    body: '#53697d',
+    dark: '#35475a',
+    legs: '#232b35'
+  });
+
+  rect(ctx, 9, 6, 14, 4, '#b8c0c8');
+  rect(ctx, 11, 3, 10, 4, '#d5dce1');
+  rect(ctx, 18, 21, 2, 8, '#d7d0aa');
+  rect(ctx, 18, 14, 2, 7, '#d7d0aa');
+  rect(ctx, 16, 13, 6, 2, '#d7d0aa');
+}
+
+function drawTownsperson(ctx) {
+  drawNpcBase(ctx, {
+    hair: '#70422e',
+    skin: '#d7a37c',
+    body: '#8b6843',
+    dark: '#5d452d',
+    legs: '#2c3436'
+  });
+
+  rect(ctx, 11, 19, 10, 2, '#d7bd79');
+  rect(ctx, 12, 23, 8, 2, '#705f3b');
+}
+
+function drawMerchant(ctx) {
+  drawNpcBase(ctx, {
+    hair: '#473127',
+    skin: '#d8a17b',
+    body: '#496f9b',
+    dark: '#334e70',
+    legs: '#2d3038'
+  });
+
+  rect(ctx, 11, 20, 10, 8, '#d6b36a');
+  rect(ctx, 13, 21, 6, 2, '#fff0a8');
+  rect(ctx, 8, 9, 16, 3, '#d88b4c');
+  rect(ctx, 10, 6, 12, 3, '#e6a45d');
+}
+
+function drawElder(ctx) {
+  drawNpcBase(ctx, {
+    hair: '#d6d2c8',
+    skin: '#d4a17d',
+    body: '#5f6073',
+    dark: '#454657',
+    legs: '#2e3039'
+  });
+
+  rect(ctx, 8, 11, 16, 4, '#d6d2c8');
+  rect(ctx, 11, 18, 10, 3, '#ece6d4');
+  rect(ctx, 23, 21, 2, 9, '#8d7146');
+  rect(ctx, 22, 29, 4, 2, '#8d7146');
 }

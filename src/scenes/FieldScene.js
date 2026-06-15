@@ -1,9 +1,11 @@
 import Phaser from 'phaser';
-import { playCancel, playConfirm } from '../audio/sfx.js';
+import { playCancel, playConfirm, playText } from '../audio/sfx.js';
 import { GAME_HEIGHT, GAME_WIDTH, SCENE_KEYS, TILE_SIZE, TILE_TYPES } from '../game/constants.js';
 import { TEXTURE_KEYS } from '../game/pixelTextures.js';
 import { createInitialPlayer } from '../data/player.js';
 import { getMap } from '../data/maps.js';
+import { getNpcsForMap } from '../data/npcs.js';
+import MessageBox from '../ui/MessageBox.js';
 
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
@@ -28,17 +30,35 @@ export default class FieldScene extends Phaser.Scene {
 
   create(data = {}) {
     this.nextMoveAt = 0;
-    this.player = data.player ? { ...createInitialPlayer(), ...data.player } : createInitialPlayer();
+    this.player = this.createPlayerState(data.player);
     this.map = getMap(this.player.mapId);
+    this.npcs = getNpcsForMap(this.map.id);
     this.blockMarker = null;
 
     this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x0a101a).setOrigin(0);
     this.drawMap();
+    this.drawNpcs();
     this.createPlayerSprite();
     this.createStatusWindow();
     this.createNoticeText();
+    this.messageBox = new MessageBox(this);
+    this.showInitialHint();
     this.setupInput();
     this.publishDebugState();
+  }
+
+  createPlayerState(playerData) {
+    const initialPlayer = createInitialPlayer();
+    if (!playerData) return initialPlayer;
+
+    return {
+      ...initialPlayer,
+      ...playerData,
+      flags: {
+        ...initialPlayer.flags,
+        ...(playerData.flags ?? {})
+      }
+    };
   }
 
   drawMap() {
@@ -53,6 +73,13 @@ export default class FieldScene extends Phaser.Scene {
           .setOrigin(0)
           .setStrokeStyle(1, 0x111827, 0.2);
       });
+    });
+  }
+
+  drawNpcs() {
+    this.npcSprites = this.npcs.map((npc) => {
+      const { x, y } = this.tileToWorld(npc.x, npc.y);
+      return this.add.image(x, y, npc.textureKey).setDepth(9);
     });
   }
 
@@ -96,6 +123,11 @@ export default class FieldScene extends Phaser.Scene {
   handleKeyDown(event) {
     event.preventDefault();
 
+    if (this.messageBox?.isOpen()) {
+      this.handleMessageKey(event);
+      return;
+    }
+
     if (event.code === 'ArrowUp' || event.code === 'KeyW') {
       this.tryMove('up');
     } else if (event.code === 'ArrowDown' || event.code === 'KeyS') {
@@ -106,8 +138,23 @@ export default class FieldScene extends Phaser.Scene {
       this.tryMove('right');
     } else if (this.isConfirm(event)) {
       this.interact();
-    } else if (event.code === 'Escape' || event.code === 'KeyX') {
+    } else if (this.isCancel(event)) {
       safelyPlay(playCancel);
+    }
+  }
+
+  handleMessageKey(event) {
+    if (this.isConfirm(event)) {
+      const result = this.messageBox.advance();
+      safelyPlay(result === 'advanced' ? playText : playCancel);
+      this.publishDebugState();
+      return;
+    }
+
+    if (this.isCancel(event)) {
+      this.messageBox.close();
+      safelyPlay(playCancel);
+      this.publishDebugState();
     }
   }
 
@@ -115,7 +162,13 @@ export default class FieldScene extends Phaser.Scene {
     return event.code === 'Enter' || event.code === 'Space' || event.code === 'KeyZ';
   }
 
+  isCancel(event) {
+    return event.code === 'Escape' || event.code === 'KeyX';
+  }
+
   tryMove(direction) {
+    if (this.messageBox?.isOpen()) return;
+
     const now = this.time.now;
     if (now < this.nextMoveAt) return;
     this.nextMoveAt = now + 120;
@@ -127,6 +180,12 @@ export default class FieldScene extends Phaser.Scene {
     };
 
     this.player.direction = direction;
+
+    const npc = this.getNpcAt(target.x, target.y);
+    if (npc) {
+      this.showNpcPrompt(target.x, target.y);
+      return;
+    }
 
     if (!this.canMoveTo(target.x, target.y)) {
       this.showBlocked(target.x, target.y);
@@ -144,9 +203,17 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   interact() {
-    if (this.tryTransitionAt(this.player.x, this.player.y)) return;
+    if (this.messageBox?.isOpen()) return;
 
     const facing = this.getFacingPosition();
+    const npc = this.getNpcAt(facing.x, facing.y);
+    if (npc) {
+      this.startNpcConversation(npc);
+      return;
+    }
+
+    if (this.tryTransitionAt(this.player.x, this.player.y)) return;
+
     if (this.tryTransitionAt(facing.x, facing.y)) return;
 
     safelyPlay(playCancel);
@@ -190,9 +257,46 @@ export default class FieldScene extends Phaser.Scene {
     this.scene.restart({ player: this.player });
   }
 
+  startNpcConversation(npc) {
+    this.noticeText.setText('');
+    safelyPlay(playConfirm);
+    this.messageBox.show({
+      speaker: npc.name,
+      lines: this.getNpcDialogue(npc),
+      onComplete: () => this.completeNpcConversation(npc)
+    });
+    this.publishDebugState();
+  }
+
+  getNpcDialogue(npc) {
+    if (npc.id === 'king' && this.player.flags.acceptedQuest) {
+      return npc.acceptedDialogue;
+    }
+
+    return npc.dialogue;
+  }
+
+  completeNpcConversation(npc) {
+    if (npc.id === 'king' && !this.player.flags.acceptedQuest) {
+      this.player.flags.acceptedQuest = true;
+    }
+
+    this.publishDebugState();
+  }
+
   showBlocked(x, y) {
     this.noticeText.setText('\u305d\u3053\u3078\u306f\u9032\u3081\u306a\u3044\u3002');
+    this.showTileMarker(x, y, 0xffffff, 0.22);
+    this.publishDebugState();
+  }
 
+  showNpcPrompt(x, y) {
+    this.noticeText.setText('\u8a71\u3057\u304b\u3051\u308b\u306b\u306f\u6c7a\u5b9a\u30ad\u30fc\u3092\u62bc\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
+    this.showTileMarker(x, y, 0xfff2b0, 0.28);
+    this.publishDebugState();
+  }
+
+  showTileMarker(x, y, color, alpha) {
     if (this.blockMarker) {
       this.blockMarker.destroy();
       this.blockMarker = null;
@@ -204,8 +308,8 @@ export default class FieldScene extends Phaser.Scene {
         y * TILE_SIZE,
         TILE_SIZE,
         TILE_SIZE,
-        0xffffff,
-        0.22
+        color,
+        alpha
       ).setOrigin(0).setDepth(8);
 
       this.time.delayedCall(120, () => {
@@ -215,8 +319,6 @@ export default class FieldScene extends Phaser.Scene {
         }
       });
     }
-
-    this.publishDebugState();
   }
 
   updatePlayerSprite() {
@@ -239,6 +341,17 @@ export default class FieldScene extends Phaser.Scene {
       x: this.player.x + delta.x,
       y: this.player.y + delta.y
     };
+  }
+
+  getNpcAt(x, y) {
+    return this.npcs.find((npc) => npc.x === x && npc.y === y);
+  }
+
+  showInitialHint() {
+    if (this.player.flags.acceptedQuest || this.player.flags.seenInitialHint) return;
+
+    this.noticeText.setText('\u738b\u306b\u8a71\u3057\u304b\u3051\u3066\u304f\u3060\u3055\u3044\u3002');
+    this.player.flags.seenInitialHint = true;
   }
 
   getStatusText() {
@@ -273,7 +386,18 @@ export default class FieldScene extends Phaser.Scene {
         x: this.player.x,
         y: this.player.y,
         direction: this.player.direction
-      }
+      },
+      flags: { ...this.player.flags },
+      npcs: this.npcs.map((npc) => ({
+        id: npc.id,
+        x: npc.x,
+        y: npc.y
+      })),
+      dialog: {
+        open: this.messageBox?.isOpen() ?? false,
+        speaker: this.messageBox?.speaker ?? ''
+      },
+      notice: this.noticeText?.text ?? ''
     };
   }
 }
