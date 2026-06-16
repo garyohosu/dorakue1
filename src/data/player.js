@@ -20,7 +20,10 @@ export const INITIAL_PLAYER = {
     openedTowerDoor: false,
     gotBlueOrb: false,
     openedTowerChest: false,
-    gotDawnMark: false
+    gotDawnMark: false,
+    openedShrineDoor: false,
+    gotTideMirror: false,
+    openedShrineChest: false
   }
 };
 

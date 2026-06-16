@@ -13,7 +13,8 @@ export const MAP_IDS = {
   CASTLE: 'castle',
   TOWN: 'town',
   CAVE: 'cave',
-  TOWER: 'tower'
+  TOWER: 'tower',
+  SHRINE: 'shrine'
 };
 
 export const TILE = {
@@ -26,6 +27,7 @@ export const TILE = {
   TOWN: 'town',
   CAVE: 'cave',
   TOWER: 'tower',
+  SHRINE: 'shrine',
   FLOOR: 'floor',
   WALL: 'wall',
   EXIT: 'exit',
@@ -78,6 +80,11 @@ export const TILE_TYPES = {
   [TILE.TOWER]: {
     label: '\u661f\u898b\u306e\u5854',
     textureKey: 'location_tower',
+    passable: true
+  },
+  [TILE.SHRINE]: {
+    label: '\u6f6e\u9cf4\u308a\u306e\u7940',
+    textureKey: 'location_shrine',
     passable: true
   },
   [TILE.FLOOR]: {

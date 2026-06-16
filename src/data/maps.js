@@ -9,6 +9,7 @@ const C = TILE.CASTLE;
 const T = TILE.TOWN;
 const V = TILE.CAVE;
 const P = TILE.TOWER;
+const S = TILE.SHRINE;
 const O = TILE.FLOOR;
 const X = TILE.WALL;
 const E = TILE.EXIT;
@@ -61,6 +62,17 @@ export const WORLD_MAP = {
       requiredFlag: 'gotMoonKey',
       missingMessage: '\u6708\u7d0b\u306e\u9375\u304c\u306a\u3051\u308c\u3070\u3001\u5854\u306e\u6249\u306f\u958b\u304b\u306a\u3044\u3002',
       setFlag: 'openedTowerDoor'
+    },
+    {
+      x: 16,
+      y: 12,
+      targetMapId: MAP_IDS.SHRINE,
+      targetX: 10,
+      targetY: 13,
+      targetDirection: 'up',
+      requiredFlag: 'gotDawnMark',
+      missingMessage: '\u671d\u9727\u306e\u5370\u304c\u306a\u3051\u308c\u3070\u3001\u7940\u306e\u77f3\u6249\u306f\u52d5\u304b\u306a\u3044\u3002',
+      setFlag: 'openedShrineDoor'
     }
   ],
   exits: [],
@@ -77,7 +89,7 @@ export const WORLD_MAP = {
     [W, F, G, M, M, M, G, G, G, F, F, R, G, G, R, R, R, G, F, W],
     [W, G, G, G, G, M, G, W, W, W, G, R, G, M, M, M, R, G, G, W],
     [W, G, F, F, G, G, G, W, G, W, G, R, G, G, G, M, R, F, G, W],
-    [W, G, G, G, R, R, R, R, G, W, G, R, R, R, G, G, R, G, G, W],
+    [W, G, G, G, R, R, R, R, G, W, G, R, R, R, G, G, S, G, G, W],
     [W, W, G, G, G, F, F, G, G, G, G, G, F, R, R, R, G, G, W, W],
     [W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W]
   ]
@@ -235,12 +247,51 @@ export const TOWER_MAP = {
   ]
 };
 
+export const SHRINE_MAP = {
+  id: MAP_IDS.SHRINE,
+  name: '\u6f6e\u9cf4\u308a\u306e\u7940',
+  width: 20,
+  height: 15,
+  startPositions: {
+    fromWorld: { x: 10, y: 13, direction: 'up' }
+  },
+  entrances: [],
+  exits: [
+    {
+      x: 10,
+      y: 14,
+      targetMapId: MAP_IDS.WORLD,
+      targetX: 16,
+      targetY: 11,
+      targetDirection: 'down'
+    }
+  ],
+  tiles: [
+    [X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X],
+    [X, O, O, O, O, O, X, O, O, O, K, O, O, O, X, O, O, O, O, X],
+    [X, O, X, X, X, O, X, O, X, X, O, X, X, O, X, O, X, X, O, X],
+    [X, O, O, O, X, O, O, O, X, O, O, O, X, O, O, O, X, O, O, X],
+    [X, X, X, O, X, X, X, O, X, O, X, O, X, X, X, O, X, O, X, X],
+    [X, O, O, O, O, O, X, O, O, O, X, O, O, O, X, O, O, O, O, X],
+    [X, O, X, X, X, O, X, X, X, O, X, X, X, O, X, X, X, X, O, X],
+    [X, O, O, O, X, O, O, O, X, O, O, O, X, O, O, O, O, X, O, X],
+    [X, X, X, O, X, X, X, O, X, X, X, O, X, X, X, X, O, X, O, X],
+    [X, O, O, O, O, O, X, O, O, O, O, O, X, O, O, O, O, X, O, X],
+    [X, O, X, X, X, O, X, X, X, X, X, O, X, O, X, X, X, X, O, X],
+    [X, O, O, O, X, O, O, O, O, O, X, O, O, O, X, O, O, O, O, X],
+    [X, X, X, O, X, X, X, X, X, O, X, X, X, O, X, O, X, X, O, X],
+    [X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, X],
+    [X, X, X, X, X, X, X, X, X, X, E, X, X, X, X, X, X, X, X, X]
+  ]
+};
+
 export const MAPS = {
   [WORLD_MAP.id]: WORLD_MAP,
   [CASTLE_MAP.id]: CASTLE_MAP,
   [TOWN_MAP.id]: TOWN_MAP,
   [CAVE_MAP.id]: CAVE_MAP,
-  [TOWER_MAP.id]: TOWER_MAP
+  [TOWER_MAP.id]: TOWER_MAP,
+  [SHRINE_MAP.id]: SHRINE_MAP
 };
 
 export function getMap(mapId = MAP_IDS.WORLD) {
