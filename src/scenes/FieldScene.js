@@ -175,7 +175,7 @@ export default class FieldScene extends Phaser.Scene {
     button.add([fill, text]);
     button.setSize(size, size);
     button.setInteractive(
-      new Phaser.Geom.Circle(0, 0, size / 2),
+      new Phaser.Geom.Circle(size / 2, size / 2, size / 2),
       Phaser.Geom.Circle.Contains
     );
     button.on('pointerdown', (pointer, localX, localY, event) => {

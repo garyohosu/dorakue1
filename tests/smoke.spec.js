@@ -68,6 +68,97 @@ test('shows touch controls on mobile viewport', async ({ page, isMobile }) => {
   expect(debugState.mapId).toBe('world');
 });
 
+test('touch UP button hit area is aligned with visual button', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile-only touch hit area test');
+
+  await page.goto('/');
+  await expect(page.locator('canvas')).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__dorakueDebug?.scene ?? '');
+  }).toBe('FieldScene');
+
+  const canvas = page.locator('canvas');
+  const box = await canvas.boundingBox();
+
+  // UP button centre in game coords: (82, 350), game logical size = 640×480
+  const scaleX = box.width / 640;
+  const scaleY = box.height / 480;
+  const tapX = box.x + 82 * scaleX;
+  const tapY = box.y + 350 * scaleY;
+
+  const before = await page.evaluate(() => ({ ...window.__dorakueDebug.player }));
+
+  await page.touchscreen.tap(tapX, tapY);
+  await page.waitForTimeout(300);
+
+  const after = await page.evaluate(() => ({ ...window.__dorakueDebug.player }));
+
+  expect(after.direction).toBe('up');
+  expect(after).toMatchObject({ x: before.x, y: before.y });
+});
+
+test('touch A button hit area is aligned with visual button', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile-only touch hit area test');
+
+  const preparedPlayer = {
+    name: 'アレン',
+    level: 1,
+    exp: 0,
+    nextExp: 18,
+    hp: 24,
+    maxHp: 24,
+    mp: 4,
+    maxMp: 4,
+    attack: 6,
+    defense: 3,
+    gold: 30,
+    herbs: 1,
+    mapId: 'world',
+    x: 4,
+    y: 3,
+    direction: 'left',
+    flags: {}
+  };
+
+  await page.addInitScript((player) => {
+    localStorage.setItem('dorakue1.save.v1', JSON.stringify({
+      version: 1,
+      savedAt: new Date().toISOString(),
+      player
+    }));
+  }, preparedPlayer);
+
+  await page.goto('/');
+  await expect(page.locator('canvas')).toBeVisible();
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__dorakueTitleDebug?.hasSave ?? false);
+  }).toBe(true);
+  await page.keyboard.press('ArrowDown');
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__dorakueTitleDebug?.selectedAction ?? '');
+  }).toBe('continue');
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__dorakueDebug?.scene ?? '');
+  }).toBe('FieldScene');
+
+  const canvas = page.locator('canvas');
+  const box = await canvas.boundingBox();
+
+  // A button centre in game coords: (554, 390), game logical size = 640x480
+  const scaleX = box.width / 640;
+  const scaleY = box.height / 480;
+  const tapX = box.x + 554 * scaleX;
+  const tapY = box.y + 390 * scaleY;
+
+  await page.touchscreen.tap(tapX, tapY);
+
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__dorakueDebug?.mapId ?? '');
+  }).toBe('castle');
+});
+
 test('continues from a prepared save and reaches THE END', async ({ page }) => {
   const preparedPlayer = {
     name: 'アレン',
