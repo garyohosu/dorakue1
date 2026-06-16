@@ -14,6 +14,15 @@ const DIRECTIONS = {
   right: { x: 1, y: 0 }
 };
 
+const STATUS_BAR = {
+  x: 12,
+  y: 8,
+  width: GAME_WIDTH - 24,
+  height: 28,
+  textX: 24,
+  textY: 14
+};
+
 function safelyPlay(fn) {
   try {
     fn();
@@ -90,16 +99,16 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   createStatusWindow() {
-    this.add.rectangle(464, 12, 164, 156, 0x05070d, 0.9)
+    this.add.rectangle(STATUS_BAR.x, STATUS_BAR.y, STATUS_BAR.width, STATUS_BAR.height, 0x05070d, 0.9)
       .setOrigin(0)
       .setStrokeStyle(2, 0xf8f1d8)
       .setDepth(20);
 
-    this.statusText = this.add.text(478, 24, this.getStatusText(), {
+    this.statusText = this.add.text(STATUS_BAR.textX, STATUS_BAR.textY, this.getStatusText(), {
       fontFamily: 'monospace',
       fontSize: '14px',
       color: '#ffffff',
-      lineSpacing: 5
+      wordWrap: { width: STATUS_BAR.width - 24, useAdvancedWrap: true }
     }).setDepth(21);
   }
 
@@ -355,14 +364,7 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   getStatusText() {
-    return [
-      `\u73fe\u5728\u5730: ${this.map.name}`,
-      this.player.name,
-      `Lv ${this.player.level}`,
-      `HP ${this.player.hp}/${this.player.maxHp}`,
-      `MP ${this.player.mp}/${this.player.maxMp}`,
-      `${this.player.gold}\u30ea\u30e0`
-    ].join('\n');
+    return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0`;
   }
 
   getPlayerTexture() {
