@@ -133,7 +133,7 @@ test('continues from a prepared save and reaches THE END', async ({ page }) => {
   await page.keyboard.press('Enter');
   await expect.poll(async () => {
     return page.evaluate(() => window.__dorakueDebug?.dialog?.speaker ?? '');
-  }).toBe('黒鐘の王');
+  }).toBe('黒冠卿オルヴェス');
 
   for (let index = 0; index < 40; index += 1) {
     let debugState = await page.evaluate(() => window.__dorakueDebug);

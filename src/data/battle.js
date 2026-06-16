@@ -2,24 +2,30 @@ import { MAP_IDS, TILE, TILE_TYPES } from '../game/constants.js';
 
 const ENCOUNTER_TABLES = {
   [MAP_IDS.WORLD]: [
-    { name: '夜露スライム', hp: 12, attack: 5, defense: 1, exp: 6, gold: 8 },
-    { name: 'こかげコウモリ', hp: 14, attack: 6, defense: 2, exp: 8, gold: 10 }
+    { name: '風切り草', hp: 12, attack: 5, defense: 1, exp: 6, gold: 8 },
+    { name: '小さな泥人', hp: 14, attack: 6, defense: 2, exp: 8, gold: 10 }
   ],
   [MAP_IDS.CAVE]: [
-    { name: '月苔の小鬼', hp: 18, attack: 7, defense: 2, exp: 11, gold: 13 },
-    { name: '石殻ムカデ', hp: 20, attack: 8, defense: 3, exp: 13, gold: 14 }
+    { name: '小さな泥人', hp: 18, attack: 7, defense: 2, exp: 11, gold: 13 },
+    { name: '苔羽虫', hp: 20, attack: 8, defense: 3, exp: 13, gold: 14 },
+    { name: '洞火の影', hp: 22, attack: 8, defense: 3, exp: 15, gold: 15 },
+    { name: '木根の獣', hp: 24, attack: 9, defense: 4, exp: 17, gold: 16 }
   ],
   [MAP_IDS.TOWER]: [
-    { name: '星見の影', hp: 24, attack: 9, defense: 4, exp: 16, gold: 18 },
-    { name: '青火の使い', hp: 27, attack: 10, defense: 4, exp: 19, gold: 20 }
+    { name: '錆びた操り人形', hp: 24, attack: 9, defense: 4, exp: 16, gold: 18 },
+    { name: '塔の衛兵影', hp: 27, attack: 10, defense: 4, exp: 19, gold: 20 },
+    { name: '黒霧の術士', hp: 30, attack: 11, defense: 5, exp: 22, gold: 22 },
+    { name: '羽音の監視者', hp: 26, attack: 10, defense: 5, exp: 20, gold: 21 }
   ],
   [MAP_IDS.SHRINE]: [
     { name: '潮鳴りの番人', hp: 31, attack: 11, defense: 5, exp: 24, gold: 24 },
     { name: '濡れた石像', hp: 34, attack: 12, defense: 6, exp: 27, gold: 26 }
   ],
   [MAP_IDS.FINAL]: [
-    { name: '黒霧の騎士', hp: 42, attack: 14, defense: 7, exp: 38, gold: 34 },
-    { name: '夜明け喰らい', hp: 48, attack: 15, defense: 8, exp: 45, gold: 38 }
+    { name: '古い鎧', hp: 42, attack: 14, defense: 7, exp: 38, gold: 34 },
+    { name: '夜冠の使徒', hp: 45, attack: 14, defense: 7, exp: 40, gold: 35 },
+    { name: '黒硝子の獣', hp: 48, attack: 15, defense: 8, exp: 45, gold: 38 },
+    { name: '霧まといの古代獣', hp: 52, attack: 15, defense: 8, exp: 48, gold: 40 }
   ]
 };
 
@@ -37,7 +43,7 @@ export const MAX_HERBS = 9;
 
 export function createFinalBoss() {
   return {
-    name: '黒鐘の王',
+    name: '黒冠卿オルヴェス',
     hp: 64,
     attack: 16,
     defense: 8,
@@ -95,7 +101,7 @@ export function runBattle(player, enemy) {
   if (battleEnemy.hp <= 0) {
     if (enemy.finalBoss) {
       lines.push(`${enemy.name}を倒した！`);
-      lines.push('潮路の鏡が、黒い鐘の影を打ち砕いた。');
+      lines.push('暁の印が、黒冠の闇を打ち砕いた。');
       return { outcome: 'victory', lines, levelUps: [] };
     }
 

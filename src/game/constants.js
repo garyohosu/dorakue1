@@ -128,6 +128,6 @@ export const TILE_TYPES = {
   [TILE.HOUSE_FLOOR]: {
     label: '\u5bb6',
     textureKey: 'tile_house_floor',
-    passable: false
+    passable: true
   }
 };

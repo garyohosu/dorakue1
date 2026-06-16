@@ -12,9 +12,9 @@ const REQUIRED_ROUTE = [
   'cave:moon-chest',
   'tower:entrance',
   'tower:tower-chest',
-  'castle:king-dawn-mark',
+  'castle:king-morning-mirror',
   'shrine:entrance',
-  'shrine:mirror-chest',
+  'shrine:dawn-altar',
   'final:entrance',
   'final:altar-boss'
 ];
@@ -148,16 +148,19 @@ function validateProgressionFlags() {
   player.flags.gotBlueOrb = true;
   assert(player.flags.openedTowerDoor && player.flags.gotBlueOrb, 'tower progression failed');
 
-  player.flags.gotDawnMark = true;
+  player.flags.gotMorningMirror = true;
+  player.flags.gotWhiteBellShard = true;
   const shrineEntrance = getMap(MAP_IDS.WORLD).entrances.find((transition) => transition.targetMapId === MAP_IDS.SHRINE);
-  assert(shrineEntrance.requiredFlag === 'gotDawnMark', 'shrine should require dawn mark');
+  assert(!shrineEntrance.requiredFlag, 'shrine should have no required flag');
   player.flags[shrineEntrance.setFlag] = true;
   player.flags.openedShrineChest = true;
   player.flags.gotTideMirror = true;
-  assert(player.flags.openedShrineDoor && player.flags.gotTideMirror, 'shrine progression failed');
+  player.flags.gotTideShell = true;
+  player.flags.gotDawnMark = true;
+  assert(player.flags.openedShrineDoor && player.flags.gotDawnMark, 'shrine progression failed');
 
   const finalEntrance = getMap(MAP_IDS.WORLD).entrances.find((transition) => transition.targetMapId === MAP_IDS.FINAL);
-  assert(finalEntrance.requiredFlag === 'gotTideMirror', 'final area should require tide mirror');
+  assert(finalEntrance.requiredFlag === 'gotDawnMark', 'final area should require dawn mark');
   player.flags[finalEntrance.setFlag] = true;
   assert(player.flags.openedFinalPath, 'final path flag failed');
 }
@@ -179,7 +182,7 @@ function validateBattleBalance() {
   ready.herbs = 5;
   const readyBoss = runBattle(ready, createFinalBoss());
   assert(readyBoss.outcome === 'victory', 'prepared player should beat final boss');
-  assert(readyBoss.lines.some((line) => line.includes('黒鐘の王を倒した')), 'final boss victory text is missing');
+  assert(readyBoss.lines.some((line) => line.includes('黒冠卿オルヴェスを倒した')), 'final boss victory text is missing');
   assert(!readyBoss.lines.some((line) => line.includes('経験値')), 'final boss should not show grind rewards');
 }
 

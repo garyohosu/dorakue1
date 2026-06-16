@@ -72,8 +72,6 @@ export const WORLD_MAP = {
       targetX: 10,
       targetY: 13,
       targetDirection: 'up',
-      requiredFlag: 'gotDawnMark',
-      missingMessage: '\u671d\u9727\u306e\u5370\u304c\u306a\u3051\u308c\u3070\u3001\u7940\u306e\u77f3\u6249\u306f\u52d5\u304b\u306a\u3044\u3002',
       setFlag: 'openedShrineDoor'
     },
     {
@@ -83,8 +81,8 @@ export const WORLD_MAP = {
       targetX: 10,
       targetY: 13,
       targetDirection: 'up',
-      requiredFlag: 'gotTideMirror',
-      missingMessage: '\u6f6e\u8def\u306e\u93e1\u304c\u306a\u3051\u308c\u3070\u3001\u9ed2\u3044\u5cac\u3078\u306e\u6d77\u9053\u306f\u898b\u3048\u306a\u3044\u3002',
+      requiredFlag: 'gotDawnMark',
+      missingMessage: '\u6681\u306e\u5370\u304c\u306a\u3051\u308c\u3070\u3001\u9ed2\u3044\u5cac\u3078\u306e\u6d77\u9053\u306f\u958b\u3051\u306a\u3044\u3002',
       setFlag: 'openedFinalPath'
     }
   ],

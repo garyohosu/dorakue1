@@ -418,7 +418,7 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   getNpcDialogue(npc) {
-    if (this.player.flags.gotTideMirror && npc.mirrorDialogue) {
+    if (this.player.flags.gotDawnMark && npc.mirrorDialogue) {
       return npc.mirrorDialogue;
     }
 
@@ -426,7 +426,7 @@ export default class FieldScene extends Phaser.Scene {
       return npc.dawnDialogue;
     }
 
-    if (npc.id === 'king' && this.player.flags.gotBlueOrb && !this.player.flags.gotDawnMark && npc.orbDialogue) {
+    if (npc.id === 'king' && this.player.flags.gotBlueOrb && !this.player.flags.gotMorningMirror && npc.orbDialogue) {
       return npc.orbDialogue;
     }
 
@@ -446,8 +446,9 @@ export default class FieldScene extends Phaser.Scene {
       this.player.flags.acceptedQuest = true;
     }
 
-    if (npc.id === 'king' && this.player.flags.gotBlueOrb && !this.player.flags.gotDawnMark) {
-      this.player.flags.gotDawnMark = true;
+    if (npc.id === 'king' && this.player.flags.gotBlueOrb && !this.player.flags.gotMorningMirror) {
+      this.player.flags.gotMorningMirror = true;
+      this.player.flags.gotWhiteBellShard = true;
       this.statusText.setText(this.getStatusText());
     }
 
@@ -689,26 +690,55 @@ export default class FieldScene extends Phaser.Scene {
   openShrineChest() {
     this.noticeText.setText('');
 
-    if (this.player.flags.openedShrineChest) {
-      safelyPlay(playCancel);
+    if (!this.player.flags.openedShrineChest) {
+      this.player.flags.openedShrineChest = true;
+      this.player.flags.gotTideMirror = true;
+      this.player.flags.gotTideShell = true;
+      this.statusText.setText(this.getStatusText());
+      this.persistProgress();
+      safelyPlay(playConfirm);
       this.messageBox.show({
-        lines: ['\u5b9d\u7bb1\u306f\u304b\u3089\u3063\u307d\u3060\u3002']
+        lines: ['\u6f6e\u306e\u97f3\u304c\u77f3\u5ba4\u306b\u6e80\u3061\u305f\u3002', '\u6f6e\u8def\u306e\u8c9d\u3092\u624b\u306b\u5165\u308c\u305f\uff01'],
+        onComplete: () => this.checkAndCompleteDawnMark()
       });
       this.publishDebugState();
       return;
     }
 
-    this.player.flags.openedShrineChest = true;
-    this.player.flags.gotTideMirror = true;
+    this.checkAndCompleteDawnMark();
+  }
+
+  checkAndCompleteDawnMark() {
+    if (this.player.flags.gotDawnMark) {
+      safelyPlay(playConfirm);
+      this.messageBox.show({
+        lines: ['\u6681\u306e\u5370\u306f\u3059\u3067\u306b\u5b8c\u6210\u3057\u3066\u3044\u308b\u3002', '\u9ed2\u3044\u5cac\u3078\u306e\u9053\u306f\u958b\u304b\u308c\u305f\u3002']
+      });
+      this.publishDebugState();
+      return;
+    }
+
+    const required = ['gotMoonKey', 'gotBlueOrb', 'gotMorningMirror', 'gotWhiteBellShard', 'gotTideShell'];
+    const missing = required.filter((flag) => !this.player.flags[flag]);
+
+    if (missing.length > 0) {
+      safelyPlay(playCancel);
+      this.messageBox.show({
+        lines: [
+          '\u307e\u3060\u6681\u306e\u5370\u306f\u5f62\u3092\u6210\u3055\u306a\u3044\u3002',
+          '\u6708\u306e\u9375\u3001\u9752\u706f\u306e\u73e0\u3001\u671d\u9727\u306e\u93e1\u3001\u767d\u9418\u306e\u7834\u7247\u3001\u6f6e\u8def\u306e\u8c9d\u304c\u5fc5\u8981\u3060\u3002'
+        ]
+      });
+      this.publishDebugState();
+      return;
+    }
+
+    this.player.flags.gotDawnMark = true;
     this.statusText.setText(this.getStatusText());
     this.persistProgress();
-    safelyPlay(playConfirm);
+    safelyPlay(playVictory);
     this.messageBox.show({
-      lines: [
-        '\u6f6e\u306e\u97f3\u304c\u77f3\u5ba4\u306b\u6e80\u3061\u305f\u3002',
-        '\u6f6e\u8def\u306e\u93e1\u3092\u624b\u306b\u5165\u308c\u305f\uff01',
-        '\u9ed2\u3044\u5cac\u3078\u7d9a\u304f\u9053\u304c\u3001\u6d77\u8fba\u306b\u958b\u3051\u305d\u3046\u3060\u3002'
-      ]
+      lines: ['\u6681\u306e\u5370\u304c\u671d\u306e\u5149\u3092\u5bbf\u3057\u305f\u3002', '\u9ed2\u3044\u5cac\u3078\u306e\u6d77\u9053\u304c\u958b\u304b\u308c\u305f\u3002']
     });
     this.publishDebugState();
   }
@@ -739,7 +769,7 @@ export default class FieldScene extends Phaser.Scene {
     if (result.outcome !== 'victory') {
       safelyPlay(playDamage);
       this.messageBox.show({
-        speaker: '黒鐘の王',
+        speaker: '黒冠卿オルヴェス',
         lines: [
           '祭壇の闇が、白鐘の音を飲み込んだ。',
           ...result.lines,
@@ -757,10 +787,10 @@ export default class FieldScene extends Phaser.Scene {
     this.persistProgress();
     safelyPlay(playVictory);
     this.messageBox.show({
-      speaker: '黒鐘の王',
+      speaker: '黒冠卿オルヴェス',
       lines: [
         ...result.lines,
-        '\u6f6e\u8def\u306e\u93e1\u304c\u95c7\u306e\u796d\u58c7\u306b\u671d\u306e\u5149\u3092\u8fd4\u3057\u305f\u3002',
+        '\u6681\u306e\u5370\u304c\u3001\u95c7\u306e\u796d\u58c7\u306b\u671d\u306e\u5149\u3092\u8fd4\u3057\u305f\u3002',
         '\u9ed2\u3044\u9727\u306f\u6d77\u3078\u3068\u307b\u3069\u3051\u3001\u9060\u304f\u767d\u9418\u304c\u9cf4\u308a\u59cb\u3081\u308b\u3002',
         '\u9577\u3044\u591c\u306f\u7d42\u308f\u3063\u305f\u3002',
         '\u30a2\u30ec\u30f3\u306e\u65c5\u306f\u3001\u671d\u306e\u5c0f\u5f84\u306b\u8a9e\u308a\u7d99\u304c\u308c\u308b\u3002',
@@ -774,10 +804,11 @@ export default class FieldScene extends Phaser.Scene {
     const keyText = this.player.flags.gotMoonKey ? ' 月鍵' : '';
     const towerText = this.player.flags.openedTowerDoor ? ' 塔' : '';
     const orbText = this.player.flags.gotBlueOrb ? ' 青珠' : '';
-    const dawnText = this.player.flags.gotDawnMark ? ' 朝印' : '';
-    const mirrorText = this.player.flags.gotTideMirror ? ' 鏡' : '';
+    const morningText = this.player.flags.gotMorningMirror ? ' 朝鏡' : '';
+    const shellText = this.player.flags.gotTideShell ? ' 貝' : '';
+    const dawnText = this.player.flags.gotDawnMark ? ' 暁印' : '';
     const clearText = this.player.flags.clearedGame ? ' 夜明' : '';
-    return `${this.map.name} ${this.player.name} Lv${this.player.level} HP${this.player.hp}/${this.player.maxHp} MP${this.player.mp}/${this.player.maxMp} EXP${this.player.exp}/${this.player.nextExp} ${this.player.gold}R 草${this.player.herbs}${keyText}${towerText}${orbText}${dawnText}${mirrorText}${clearText}`;
+    return `${this.map.name} ${this.player.name} Lv${this.player.level} HP${this.player.hp}/${this.player.maxHp} MP${this.player.mp}/${this.player.maxMp} EXP${this.player.exp}/${this.player.nextExp} ${this.player.gold}R 草${this.player.herbs}${keyText}${towerText}${orbText}${morningText}${shellText}${dawnText}${clearText}`;
   }
 
   persistProgress() {
