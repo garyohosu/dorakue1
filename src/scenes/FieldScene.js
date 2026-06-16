@@ -796,7 +796,6 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   publishDebugState() {
-    if (!import.meta.env.DEV) return;
     window.__dorakueDebug = {
       scene: 'FieldScene',
       mapId: this.map.id,
