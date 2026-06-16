@@ -30,6 +30,7 @@ export const INITIAL_PLAYER = {
     gotTideMirror: false,
     openedShrineChest: false,
     openedFinalPath: false,
+    defeatedFinalBoss: false,
     clearedGame: false
   }
 };

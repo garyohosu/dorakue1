@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { playCancel, playConfirm, playDamage, playHeal, playItem, playLevelUp, playText, playVictory } from '../audio/sfx.js';
 import { GAME_HEIGHT, GAME_WIDTH, MAP_IDS, SCENE_KEYS, TILE, TILE_SIZE, TILE_TYPES } from '../game/constants.js';
 import { TEXTURE_KEYS } from '../game/pixelTextures.js';
-import { buyHerb, createEncounter, restAtInn, runBattle, shouldStartEncounter } from '../data/battle.js';
+import { buyHerb, createEncounter, createFinalBoss, restAtInn, runBattle, shouldStartEncounter } from '../data/battle.js';
 import { createInitialPlayer } from '../data/player.js';
 import { savePlayer } from '../data/save.js';
 import { getMap } from '../data/maps.js';
@@ -728,12 +728,38 @@ export default class FieldScene extends Phaser.Scene {
       return;
     }
 
-    this.player.flags.clearedGame = true;
+    this.startFinalBossBattle();
+  }
+
+  startFinalBossBattle() {
+    const result = runBattle(this.player, createFinalBoss());
     this.statusText.setText(this.getStatusText());
     this.persistProgress();
-    safelyPlay(playConfirm);
+
+    if (result.outcome !== 'victory') {
+      safelyPlay(playDamage);
+      this.messageBox.show({
+        speaker: '黒鐘の王',
+        lines: [
+          '祭壇の闇が、白鐘の音を飲み込んだ。',
+          ...result.lines,
+          '装備を整え、もう一度黒い岬へ向かおう。'
+        ],
+        onComplete: () => this.returnToCastleAfterDefeat()
+      });
+      this.publishDebugState();
+      return;
+    }
+
+    this.player.flags.clearedGame = true;
+    this.player.flags.defeatedFinalBoss = true;
+    this.statusText.setText(this.getStatusText());
+    this.persistProgress();
+    safelyPlay(playVictory);
     this.messageBox.show({
+      speaker: '黒鐘の王',
       lines: [
+        ...result.lines,
         '\u6f6e\u8def\u306e\u93e1\u304c\u95c7\u306e\u796d\u58c7\u306b\u671d\u306e\u5149\u3092\u8fd4\u3057\u305f\u3002',
         '\u9ed2\u3044\u9727\u306f\u6d77\u3078\u3068\u307b\u3069\u3051\u3001\u9060\u304f\u767d\u9418\u304c\u9cf4\u308a\u59cb\u3081\u308b\u3002',
         '\u9577\u3044\u591c\u306f\u7d42\u308f\u3063\u305f\u3002',

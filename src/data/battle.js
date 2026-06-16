@@ -35,6 +35,18 @@ export const HERB_PRICE = 12;
 export const HERB_HEAL = 18;
 export const MAX_HERBS = 9;
 
+export function createFinalBoss() {
+  return {
+    name: '黒鐘の王',
+    hp: 64,
+    attack: 16,
+    defense: 8,
+    exp: 0,
+    gold: 0,
+    finalBoss: true
+  };
+}
+
 export function canEncounter(map, tileId) {
   if (!ENCOUNTER_TABLES[map.id]) return false;
   if (tileId === TILE.CASTLE || tileId === TILE.TOWN || tileId === TILE.CAVE || tileId === TILE.TOWER || tileId === TILE.SHRINE || tileId === TILE.FINAL) {
@@ -81,6 +93,12 @@ export function runBattle(player, enemy) {
   }
 
   if (battleEnemy.hp <= 0) {
+    if (enemy.finalBoss) {
+      lines.push(`${enemy.name}を倒した！`);
+      lines.push('潮路の鏡が、黒い鐘の影を打ち砕いた。');
+      return { outcome: 'victory', lines, levelUps: [] };
+    }
+
     const levelUps = grantRewards(player, enemy.exp, enemy.gold);
     lines.push(`${enemy.name}を倒した！`);
     lines.push(`${enemy.exp} 経験値と ${enemy.gold}リムを手に入れた。`);
