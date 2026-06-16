@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
-import { playCancel, playConfirm, playText } from '../audio/sfx.js';
+import { playCancel, playConfirm, playDamage, playHeal, playItem, playLevelUp, playText, playVictory } from '../audio/sfx.js';
 import { GAME_HEIGHT, GAME_WIDTH, MAP_IDS, SCENE_KEYS, TILE, TILE_SIZE, TILE_TYPES } from '../game/constants.js';
 import { TEXTURE_KEYS } from '../game/pixelTextures.js';
+import { buyHerb, createEncounter, restAtInn, runBattle, shouldStartEncounter } from '../data/battle.js';
 import { createInitialPlayer } from '../data/player.js';
 import { savePlayer } from '../data/save.js';
 import { getMap } from '../data/maps.js';
@@ -117,9 +118,8 @@ export default class FieldScene extends Phaser.Scene {
 
     this.statusText = this.add.text(STATUS_BAR.textX, STATUS_BAR.textY, this.getStatusText(), {
       fontFamily: 'monospace',
-      fontSize: '14px',
-      color: '#ffffff',
-      wordWrap: { width: STATUS_BAR.width - 24, useAdvancedWrap: true }
+      fontSize: '12px',
+      color: '#ffffff'
     }).setDepth(21);
   }
 
@@ -298,7 +298,9 @@ export default class FieldScene extends Phaser.Scene {
     this.persistProgress();
     this.publishDebugState();
 
-    this.tryTransitionAt(this.player.x, this.player.y);
+    if (this.tryTransitionAt(this.player.x, this.player.y)) return;
+
+    this.tryStartEncounter();
   }
 
   interact() {
@@ -449,7 +451,41 @@ export default class FieldScene extends Phaser.Scene {
       this.statusText.setText(this.getStatusText());
     }
 
+    if (npc.id === 'merchant') {
+      this.buyHerbFromMerchant();
+      return;
+    }
+
+    if (npc.id === 'innkeeper') {
+      this.restAtTownInn();
+      return;
+    }
+
     this.persistProgress();
+    this.publishDebugState();
+  }
+
+  buyHerbFromMerchant() {
+    const result = buyHerb(this.player);
+    this.statusText.setText(this.getStatusText());
+    this.persistProgress();
+    safelyPlay(result.ok ? playItem : playCancel);
+    this.messageBox.show({
+      speaker: '商人',
+      lines: result.lines
+    });
+    this.publishDebugState();
+  }
+
+  restAtTownInn() {
+    const result = restAtInn(this.player);
+    this.statusText.setText(this.getStatusText());
+    this.persistProgress();
+    safelyPlay(result.ok ? playHeal : playCancel);
+    this.messageBox.show({
+      speaker: '宿屋',
+      lines: result.lines
+    });
     this.publishDebugState();
   }
 
@@ -535,6 +571,43 @@ export default class FieldScene extends Phaser.Scene {
 
     this.noticeText.setText('\u738b\u306b\u8a71\u3057\u304b\u3051\u3066\u304f\u3060\u3055\u3044\u3002');
     this.player.flags.seenInitialHint = true;
+  }
+
+  tryStartEncounter() {
+    const tileId = this.getTileAt(this.player.x, this.player.y);
+    if (!shouldStartEncounter(this.map, tileId)) return;
+
+    const enemy = createEncounter(this.map.id);
+    const result = runBattle(this.player, enemy);
+    this.statusText.setText(this.getStatusText());
+    this.persistProgress();
+
+    if (result.outcome === 'victory') {
+      safelyPlay(result.levelUps.length > 0 ? playLevelUp : playVictory);
+      this.messageBox.show({
+        speaker: '戦闘',
+        lines: result.lines
+      });
+      this.publishDebugState();
+      return;
+    }
+
+    safelyPlay(playDamage);
+    this.messageBox.show({
+      speaker: '戦闘',
+      lines: result.lines,
+      onComplete: () => this.returnToCastleAfterDefeat()
+    });
+    this.publishDebugState();
+  }
+
+  returnToCastleAfterDefeat() {
+    this.player.mapId = MAP_IDS.CASTLE;
+    this.player.x = 10;
+    this.player.y = 13;
+    this.player.direction = 'up';
+    this.persistProgress();
+    this.scene.restart({ player: this.player });
   }
 
   openMoonChest() {
@@ -672,13 +745,13 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   getStatusText() {
-    const keyText = this.player.flags.gotMoonKey ? '  \u6708\u7d0b\u306e\u9375' : '';
-    const towerText = this.player.flags.openedTowerDoor ? '  \u5854\u958b\u9580' : '';
-    const orbText = this.player.flags.gotBlueOrb ? '  \u9752\u706f\u306e\u73e0' : '';
-    const dawnText = this.player.flags.gotDawnMark ? '  \u671d\u9727\u306e\u5370' : '';
-    const mirrorText = this.player.flags.gotTideMirror ? '  \u6f6e\u8def\u306e\u93e1' : '';
-    const clearText = this.player.flags.clearedGame ? '  \u591c\u660e\u3051' : '';
-    return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0${keyText}${towerText}${orbText}${dawnText}${mirrorText}${clearText}`;
+    const keyText = this.player.flags.gotMoonKey ? ' 月鍵' : '';
+    const towerText = this.player.flags.openedTowerDoor ? ' 塔' : '';
+    const orbText = this.player.flags.gotBlueOrb ? ' 青珠' : '';
+    const dawnText = this.player.flags.gotDawnMark ? ' 朝印' : '';
+    const mirrorText = this.player.flags.gotTideMirror ? ' 鏡' : '';
+    const clearText = this.player.flags.clearedGame ? ' 夜明' : '';
+    return `${this.map.name} ${this.player.name} Lv${this.player.level} HP${this.player.hp}/${this.player.maxHp} MP${this.player.mp}/${this.player.maxMp} EXP${this.player.exp}/${this.player.nextExp} ${this.player.gold}R 草${this.player.herbs}${keyText}${towerText}${orbText}${dawnText}${mirrorText}${clearText}`;
   }
 
   persistProgress() {

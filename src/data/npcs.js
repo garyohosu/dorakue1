@@ -72,8 +72,20 @@ export const NPCS = [
     y: 13,
     textureKey: TEXTURE_KEYS.NPC_MERCHANT,
     dialogue: [
-      '\u5e97\u306f\u307e\u3060\u6e96\u5099\u4e2d\u3067\u3059\u3002',
-      '\u3067\u3082\u3001\u65c5\u306b\u51fa\u308b\u306a\u3089\u5c0f\u7652\u3057\u8349\u306f\u5927\u4e8b\u3067\u3059\u3088\u3002'
+      '\u5c0f\u7652\u3057\u8349\u306f12\u30ea\u30e0\u3067\u3059\u3002',
+      '\u4eca\u306a\u3089\u3059\u3050\u306b1\u3064\u304a\u6e21\u3057\u3067\u304d\u307e\u3059\u3002'
+    ]
+  },
+  {
+    id: 'innkeeper',
+    name: '\u5bbf\u5c4b',
+    mapId: MAP_IDS.TOWN,
+    x: 3,
+    y: 5,
+    textureKey: TEXTURE_KEYS.NPC_KEEPER,
+    dialogue: [
+      '\u4e00\u6cca10\u30ea\u30e0\u3067\u3059\u3002',
+      '\u75b2\u308c\u305f\u6642\u306f\u3001\u7121\u7406\u305b\u305a\u623b\u3063\u3066\u304d\u3066\u304f\u3060\u3055\u3044\u3002'
     ]
   },
   {
