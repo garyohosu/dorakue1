@@ -329,8 +329,8 @@ export default class FieldScene extends Phaser.Scene {
   tryInspectTile(x, y) {
     const tileId = this.getTileAt(x, y);
 
-    if (tileId === TILE.CHEST && this.map.id === MAP_IDS.CAVE) {
-      this.openMoonChest();
+    if (tileId === TILE.CHEST) {
+      this.openChestForCurrentMap();
       return true;
     }
 
@@ -407,6 +407,10 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   getNpcDialogue(npc) {
+    if (npc.id === 'king' && this.player.flags.gotBlueOrb && !this.player.flags.gotDawnMark && npc.orbDialogue) {
+      return npc.orbDialogue;
+    }
+
     if (this.player.flags.gotMoonKey && npc.keyDialogue) {
       return npc.keyDialogue;
     }
@@ -421,6 +425,11 @@ export default class FieldScene extends Phaser.Scene {
   completeNpcConversation(npc) {
     if (npc.id === 'king' && !this.player.flags.acceptedQuest) {
       this.player.flags.acceptedQuest = true;
+    }
+
+    if (npc.id === 'king' && this.player.flags.gotBlueOrb && !this.player.flags.gotDawnMark) {
+      this.player.flags.gotDawnMark = true;
+      this.statusText.setText(this.getStatusText());
     }
 
     this.publishDebugState();
@@ -528,10 +537,56 @@ export default class FieldScene extends Phaser.Scene {
     this.publishDebugState();
   }
 
+  openChestForCurrentMap() {
+    if (this.map.id === MAP_IDS.CAVE) {
+      this.openMoonChest();
+      return;
+    }
+
+    if (this.map.id === MAP_IDS.TOWER) {
+      this.openTowerChest();
+      return;
+    }
+
+    safelyPlay(playCancel);
+    this.messageBox.show({
+      lines: ['\u5b9d\u7bb1\u306f\u958b\u304b\u306a\u3044\u3002']
+    });
+    this.publishDebugState();
+  }
+
+  openTowerChest() {
+    this.noticeText.setText('');
+
+    if (this.player.flags.openedTowerChest) {
+      safelyPlay(playCancel);
+      this.messageBox.show({
+        lines: ['\u5b9d\u7bb1\u306f\u304b\u3089\u3063\u307d\u3060\u3002']
+      });
+      this.publishDebugState();
+      return;
+    }
+
+    this.player.flags.openedTowerChest = true;
+    this.player.flags.gotBlueOrb = true;
+    this.statusText.setText(this.getStatusText());
+    safelyPlay(playConfirm);
+    this.messageBox.show({
+      lines: [
+        '\u5854\u306e\u6700\u4e0a\u90e8\u3067\u9752\u3044\u5149\u304c\u5f3e\u3051\u305f\u3002',
+        '\u9752\u706f\u306e\u73e0\u3092\u624b\u306b\u5165\u308c\u305f\uff01',
+        '\u738b\u57ce\u3078\u623b\u308a\u3001\u30bb\u30ea\u30aa\u30eb\u738b\u306b\u5831\u544a\u3057\u3088\u3046\u3002'
+      ]
+    });
+    this.publishDebugState();
+  }
+
   getStatusText() {
     const keyText = this.player.flags.gotMoonKey ? '  \u6708\u7d0b\u306e\u9375' : '';
     const towerText = this.player.flags.openedTowerDoor ? '  \u5854\u958b\u9580' : '';
-    return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0${keyText}${towerText}`;
+    const orbText = this.player.flags.gotBlueOrb ? '  \u9752\u706f\u306e\u73e0' : '';
+    const dawnText = this.player.flags.gotDawnMark ? '  \u671d\u9727\u306e\u5370' : '';
+    return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0${keyText}${towerText}${orbText}${dawnText}`;
   }
 
   getPlayerTexture() {

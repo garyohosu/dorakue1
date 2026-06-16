@@ -17,7 +17,10 @@ export const INITIAL_PLAYER = {
     seenInitialHint: false,
     gotMoonKey: false,
     openedMoonChest: false,
-    openedTowerDoor: false
+    openedTowerDoor: false,
+    gotBlueOrb: false,
+    openedTowerChest: false,
+    gotDawnMark: false
   }
 };
 

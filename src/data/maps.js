@@ -218,7 +218,7 @@ export const TOWER_MAP = {
   ],
   tiles: [
     [X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X],
-    [X, O, O, O, X, O, O, O, O, O, O, O, O, O, X, O, O, O, O, X],
+    [X, O, O, O, X, O, O, O, O, O, K, O, O, O, X, O, O, O, O, X],
     [X, O, X, O, X, O, X, X, X, O, O, X, X, O, X, O, X, X, O, X],
     [X, O, X, O, O, O, X, O, O, O, O, O, X, O, O, O, O, X, O, X],
     [X, O, X, X, X, O, X, O, X, X, X, O, X, X, X, X, O, X, O, X],
