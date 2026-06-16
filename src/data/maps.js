@@ -11,6 +11,7 @@ const V = TILE.CAVE;
 const O = TILE.FLOOR;
 const X = TILE.WALL;
 const E = TILE.EXIT;
+const K = TILE.CHEST;
 const H = TILE.THRONE;
 const B = TILE.HOUSE_FLOOR;
 
@@ -167,7 +168,7 @@ export const CAVE_MAP = {
   ],
   tiles: [
     [X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X],
-    [X, O, O, O, O, X, X, O, O, O, O, O, X, X, O, O, O, O, O, X],
+    [X, O, O, O, O, X, X, O, O, O, K, O, X, X, O, O, O, O, O, X],
     [X, O, X, X, O, O, O, O, X, X, X, O, O, O, O, X, X, X, O, X],
     [X, O, X, O, O, X, X, O, O, O, X, O, X, X, O, O, O, X, O, X],
     [X, O, O, O, X, X, O, O, X, O, O, O, O, X, X, O, O, O, O, X],

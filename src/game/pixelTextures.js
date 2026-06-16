@@ -11,6 +11,7 @@ export const TEXTURE_KEYS = {
   TILE_FLOOR: 'tile_floor',
   TILE_WALL: 'tile_wall',
   TILE_EXIT: 'tile_exit',
+  TILE_CHEST: 'tile_chest',
   TILE_THRONE: 'tile_throne',
   TILE_HOUSE_FLOOR: 'tile_house_floor',
   LOCATION_CASTLE: 'location_castle',
@@ -35,6 +36,7 @@ export function registerPixelTextures(scene) {
   createTexture(scene, TEXTURE_KEYS.TILE_FLOOR, drawFloor);
   createTexture(scene, TEXTURE_KEYS.TILE_WALL, drawWall);
   createTexture(scene, TEXTURE_KEYS.TILE_EXIT, drawExit);
+  createTexture(scene, TEXTURE_KEYS.TILE_CHEST, drawChest);
   createTexture(scene, TEXTURE_KEYS.TILE_THRONE, drawThrone);
   createTexture(scene, TEXTURE_KEYS.TILE_HOUSE_FLOOR, drawHouseFloor);
   createTexture(scene, TEXTURE_KEYS.LOCATION_CASTLE, drawCastle);
@@ -188,6 +190,16 @@ function drawExit(ctx) {
   rect(ctx, 7, 25, 18, 3, '#d6b46d');
   rect(ctx, 12, 5, 8, 4, '#f1d070');
   rect(ctx, 10, 7, 12, 2, '#a97d3c');
+}
+
+function drawChest(ctx) {
+  drawFloor(ctx);
+  rect(ctx, 7, 14, 18, 13, '#6d4426');
+  rect(ctx, 8, 11, 16, 6, '#a86530');
+  rect(ctx, 7, 16, 18, 3, '#d09342');
+  rect(ctx, 15, 16, 3, 8, '#f1d070');
+  rect(ctx, 14, 19, 5, 4, '#584024');
+  rect(ctx, 9, 24, 14, 3, '#3b2418');
 }
 
 function drawThrone(ctx) {

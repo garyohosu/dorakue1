@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { playCancel, playConfirm, playText } from '../audio/sfx.js';
-import { GAME_HEIGHT, GAME_WIDTH, SCENE_KEYS, TILE_SIZE, TILE_TYPES } from '../game/constants.js';
+import { GAME_HEIGHT, GAME_WIDTH, MAP_IDS, SCENE_KEYS, TILE, TILE_SIZE, TILE_TYPES } from '../game/constants.js';
 import { TEXTURE_KEYS } from '../game/pixelTextures.js';
 import { createInitialPlayer } from '../data/player.js';
 import { getMap } from '../data/maps.js';
@@ -308,6 +308,8 @@ export default class FieldScene extends Phaser.Scene {
       return;
     }
 
+    if (this.tryInspectTile(facing.x, facing.y)) return;
+
     if (this.tryTransitionAt(this.player.x, this.player.y)) return;
 
     if (this.tryTransitionAt(facing.x, facing.y)) return;
@@ -322,6 +324,25 @@ export default class FieldScene extends Phaser.Scene {
 
     const tileId = this.map.tiles[y][x];
     return TILE_TYPES[tileId]?.passable === true;
+  }
+
+  tryInspectTile(x, y) {
+    const tileId = this.getTileAt(x, y);
+
+    if (tileId === TILE.CHEST && this.map.id === MAP_IDS.CAVE) {
+      this.openMoonChest();
+      return true;
+    }
+
+    return false;
+  }
+
+  getTileAt(x, y) {
+    if (x < 0 || y < 0 || x >= this.map.width || y >= this.map.height) {
+      return null;
+    }
+
+    return this.map.tiles[y][x];
   }
 
   tryTransitionAt(x, y) {
@@ -365,6 +386,10 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   getNpcDialogue(npc) {
+    if (this.player.flags.gotMoonKey && npc.keyDialogue) {
+      return npc.keyDialogue;
+    }
+
     if (npc.id === 'king' && this.player.flags.acceptedQuest) {
       return npc.acceptedDialogue;
     }
@@ -381,6 +406,13 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   showBlocked(x, y) {
+    if (this.getTileAt(x, y) === TILE.CHEST) {
+      this.noticeText.setText('\u5b9d\u7bb1\u306f\u6c7a\u5b9a\u30ad\u30fc\u3067\u8abf\u3079\u3089\u308c\u308b\u3002');
+      this.showTileMarker(x, y, 0xfff2b0, 0.28);
+      this.publishDebugState();
+      return;
+    }
+
     this.noticeText.setText('\u305d\u3053\u3078\u306f\u9032\u3081\u306a\u3044\u3002');
     this.showTileMarker(x, y, 0xffffff, 0.22);
     this.publishDebugState();
@@ -450,8 +482,34 @@ export default class FieldScene extends Phaser.Scene {
     this.player.flags.seenInitialHint = true;
   }
 
+  openMoonChest() {
+    this.noticeText.setText('');
+
+    if (this.player.flags.openedMoonChest) {
+      safelyPlay(playCancel);
+      this.messageBox.show({
+        lines: ['\u5b9d\u7bb1\u306f\u304b\u3089\u3063\u307d\u3060\u3002']
+      });
+      this.publishDebugState();
+      return;
+    }
+
+    this.player.flags.openedMoonChest = true;
+    this.player.flags.gotMoonKey = true;
+    this.statusText.setText(this.getStatusText());
+    safelyPlay(playConfirm);
+    this.messageBox.show({
+      lines: [
+        '\u5b9d\u7bb1\u3092\u958b\u3051\u305f\u3002',
+        '\u6708\u7d0b\u306e\u9375\u3092\u624b\u306b\u5165\u308c\u305f\uff01'
+      ]
+    });
+    this.publishDebugState();
+  }
+
   getStatusText() {
-    return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0`;
+    const keyText = this.player.flags.gotMoonKey ? '  \u6708\u7d0b\u306e\u9375' : '';
+    return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0${keyText}`;
   }
 
   getPlayerTexture() {

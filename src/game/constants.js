@@ -27,6 +27,7 @@ export const TILE = {
   FLOOR: 'floor',
   WALL: 'wall',
   EXIT: 'exit',
+  CHEST: 'chest',
   THRONE: 'throne',
   HOUSE_FLOOR: 'house_floor'
 };
@@ -86,6 +87,11 @@ export const TILE_TYPES = {
     label: '\u51fa\u53e3',
     textureKey: 'tile_exit',
     passable: true
+  },
+  [TILE.CHEST]: {
+    label: '\u5b9d\u7bb1',
+    textureKey: 'tile_chest',
+    passable: false
   },
   [TILE.THRONE]: {
     label: '\u7389\u5ea7',

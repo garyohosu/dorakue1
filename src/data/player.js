@@ -14,7 +14,9 @@ export const INITIAL_PLAYER = {
   direction: 'down',
   flags: {
     acceptedQuest: false,
-    seenInitialHint: false
+    seenInitialHint: false,
+    gotMoonKey: false,
+    openedMoonChest: false
   }
 };
 
