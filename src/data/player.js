@@ -16,7 +16,8 @@ export const INITIAL_PLAYER = {
     acceptedQuest: false,
     seenInitialHint: false,
     gotMoonKey: false,
-    openedMoonChest: false
+    openedMoonChest: false,
+    openedTowerDoor: false
   }
 };
 

@@ -17,6 +17,7 @@ export const TEXTURE_KEYS = {
   LOCATION_CASTLE: 'location_castle',
   LOCATION_TOWN: 'location_town',
   LOCATION_CAVE: 'location_cave',
+  LOCATION_TOWER: 'location_tower',
   NPC_KING: 'npc_king',
   NPC_KEEPER: 'npc_keeper',
   NPC_GUARD: 'npc_guard',
@@ -42,6 +43,7 @@ export function registerPixelTextures(scene) {
   createTexture(scene, TEXTURE_KEYS.LOCATION_CASTLE, drawCastle);
   createTexture(scene, TEXTURE_KEYS.LOCATION_TOWN, drawTown);
   createTexture(scene, TEXTURE_KEYS.LOCATION_CAVE, drawCave);
+  createTexture(scene, TEXTURE_KEYS.LOCATION_TOWER, drawTower);
   createTexture(scene, TEXTURE_KEYS.PLAYER_DOWN, (ctx) => drawPlayer(ctx, 'down'));
   createTexture(scene, TEXTURE_KEYS.PLAYER_UP, (ctx) => drawPlayer(ctx, 'up'));
   createTexture(scene, TEXTURE_KEYS.PLAYER_LEFT, (ctx) => drawPlayer(ctx, 'left'));
@@ -259,6 +261,19 @@ function drawCave(ctx) {
   rect(ctx, 10, 15, 4, 3, '#909884');
   rect(ctx, 19, 16, 3, 2, '#9aa28d');
   rect(ctx, 15, 21, 2, 2, '#7db4d7');
+}
+
+function drawTower(ctx) {
+  drawGrass(ctx);
+  rect(ctx, 6, 25, 20, 4, '#6a655d');
+  rect(ctx, 9, 10, 14, 17, '#b9b6a8');
+  rect(ctx, 7, 7, 18, 5, '#838a91');
+  rect(ctx, 11, 4, 10, 4, '#d8d6c6');
+  rect(ctx, 13, 13, 6, 5, '#4f6473');
+  rect(ctx, 14, 21, 4, 6, '#2b3038');
+  rect(ctx, 11, 8, 2, 18, '#e0dcc8');
+  rect(ctx, 20, 8, 2, 18, '#8f938a');
+  rect(ctx, 15, 3, 2, 2, '#f1d070');
 }
 
 function drawHouse(ctx, x, y, roof, wall) {

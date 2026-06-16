@@ -349,8 +349,25 @@ export default class FieldScene extends Phaser.Scene {
     const transition = this.findTransitionAt(x, y);
     if (!transition) return false;
 
+    if (!this.canUseTransition(transition)) {
+      this.showTransitionBlocked(transition, x, y);
+      return true;
+    }
+
     this.goToMap(transition);
     return true;
+  }
+
+  canUseTransition(transition) {
+    if (!transition.requiredFlag) return true;
+    return this.player.flags[transition.requiredFlag] === true;
+  }
+
+  showTransitionBlocked(transition, x, y) {
+    safelyPlay(playCancel);
+    this.noticeText.setText(transition.missingMessage ?? '\u307e\u3060\u3053\u3053\u306b\u306f\u5165\u308c\u306a\u3044\u3002');
+    this.showTileMarker(x, y, 0xfff2b0, 0.3);
+    this.publishDebugState();
   }
 
   findTransitionAt(x, y) {
@@ -364,6 +381,10 @@ export default class FieldScene extends Phaser.Scene {
 
   goToMap(transition) {
     const targetMap = getMap(transition.targetMapId);
+
+    if (transition.setFlag) {
+      this.player.flags[transition.setFlag] = true;
+    }
 
     this.player.mapId = targetMap.id;
     this.player.x = transition.targetX;
@@ -509,7 +530,8 @@ export default class FieldScene extends Phaser.Scene {
 
   getStatusText() {
     const keyText = this.player.flags.gotMoonKey ? '  \u6708\u7d0b\u306e\u9375' : '';
-    return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0${keyText}`;
+    const towerText = this.player.flags.openedTowerDoor ? '  \u5854\u958b\u9580' : '';
+    return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0${keyText}${towerText}`;
   }
 
   getPlayerTexture() {
