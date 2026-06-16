@@ -23,6 +23,13 @@ const STATUS_BAR = {
   textY: 14
 };
 
+const TOUCH_BUTTON = {
+  size: 44,
+  gap: 8,
+  alpha: 0.72,
+  depth: 35
+};
+
 function safelyPlay(fn) {
   try {
     fn();
@@ -51,6 +58,8 @@ export default class FieldScene extends Phaser.Scene {
     this.createStatusWindow();
     this.createNoticeText();
     this.messageBox = new MessageBox(this);
+    this.setupMessageTouch();
+    this.createTouchControls();
     this.showInitialHint();
     this.setupInput();
     this.publishDebugState();
@@ -120,6 +129,84 @@ export default class FieldScene extends Phaser.Scene {
       backgroundColor: '#05070dcc',
       padding: { x: 10, y: 4 }
     }).setOrigin(0.5).setDepth(30);
+  }
+
+  setupMessageTouch() {
+    this.messageBox.container.on('pointerdown', () => {
+      if (!this.messageBox.isOpen()) return;
+      const result = this.messageBox.advance();
+      safelyPlay(result === 'advanced' ? playText : playCancel);
+      this.publishDebugState();
+    });
+  }
+
+  createTouchControls() {
+    if (!this.shouldShowTouchControls()) return;
+
+    this.touchControls = this.add.container(0, 0).setDepth(TOUCH_BUTTON.depth);
+
+    const baseX = 82;
+    const baseY = GAME_HEIGHT - 78;
+    this.addTouchButton(baseX, baseY - TOUCH_BUTTON.size - TOUCH_BUTTON.gap, '\u25b2', () => this.tryMove('up'));
+    this.addTouchButton(baseX, baseY + TOUCH_BUTTON.size + TOUCH_BUTTON.gap, '\u25bc', () => this.tryMove('down'));
+    this.addTouchButton(baseX - TOUCH_BUTTON.size - TOUCH_BUTTON.gap, baseY, '\u25c0', () => this.tryMove('left'));
+    this.addTouchButton(baseX + TOUCH_BUTTON.size + TOUCH_BUTTON.gap, baseY, '\u25b6', () => this.tryMove('right'));
+
+    this.addTouchButton(GAME_WIDTH - 86, GAME_HEIGHT - 90, 'A', () => this.handleTouchConfirm(), 52);
+    this.addTouchButton(GAME_WIDTH - 148, GAME_HEIGHT - 42, 'B', () => this.handleTouchCancel(), 44);
+  }
+
+  shouldShowTouchControls() {
+    return navigator.maxTouchPoints > 0 || window.matchMedia?.('(pointer: coarse)').matches;
+  }
+
+  addTouchButton(x, y, label, onPress, size = TOUCH_BUTTON.size) {
+    const button = this.add.container(x, y);
+    const fill = this.add.circle(0, 0, size / 2, 0x05070d, TOUCH_BUTTON.alpha)
+      .setStrokeStyle(2, 0xf8f1d8, 0.86);
+    const text = this.add.text(0, 0, label, {
+      fontFamily: 'monospace',
+      fontSize: label.length === 1 ? '20px' : '18px',
+      color: '#ffffff'
+    }).setOrigin(0.5);
+
+    button.add([fill, text]);
+    button.setSize(size, size);
+    button.setInteractive(
+      new Phaser.Geom.Circle(0, 0, size / 2),
+      Phaser.Geom.Circle.Contains
+    );
+    button.on('pointerdown', (pointer, localX, localY, event) => {
+      event?.stopPropagation();
+      onPress();
+    });
+    button.on('pointerover', () => fill.setFillStyle(0x172335, 0.9));
+    button.on('pointerout', () => fill.setFillStyle(0x05070d, TOUCH_BUTTON.alpha));
+
+    this.touchControls.add(button);
+    return button;
+  }
+
+  handleTouchConfirm() {
+    if (this.messageBox?.isOpen()) {
+      const result = this.messageBox.advance();
+      safelyPlay(result === 'advanced' ? playText : playCancel);
+      this.publishDebugState();
+      return;
+    }
+
+    this.interact();
+  }
+
+  handleTouchCancel() {
+    if (this.messageBox?.isOpen()) {
+      this.messageBox.close();
+      safelyPlay(playCancel);
+      this.publishDebugState();
+      return;
+    }
+
+    safelyPlay(playCancel);
   }
 
   setupInput() {

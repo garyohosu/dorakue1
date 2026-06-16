@@ -14,7 +14,7 @@ export const gameConfig = {
   roundPixels: true,
   scene: [BootScene, TitleScene, FieldScene],
   scale: {
-    mode: Phaser.Scale.NONE,
+    mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
   render: {

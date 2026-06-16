@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../game/constants.js';
 
 const BOX_X = 16;
@@ -43,6 +44,12 @@ export default class MessageBox {
       this.bodyText,
       this.promptText
     ]).setDepth(40).setVisible(false);
+
+    this.container.setSize(BOX_WIDTH, BOX_HEIGHT);
+    this.container.setInteractive(
+      new Phaser.Geom.Rectangle(BOX_X, BOX_Y, BOX_WIDTH, BOX_HEIGHT),
+      Phaser.Geom.Rectangle.Contains
+    );
   }
 
   show({ speaker = '', lines = [], onComplete = null }) {

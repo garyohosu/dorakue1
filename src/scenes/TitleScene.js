@@ -17,6 +17,7 @@ const HELP_TEXT = [
   '移動: 方向キー / WASD',
   '決定: Enter / Space / Z',
   '戻る: Esc / X',
+  'スマホ: 十字キー / A / B',
   '',
   'フィールドでは1キー入力で1マス移動します。'
 ].join('\n');
@@ -68,11 +69,20 @@ export default class TitleScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     this.menuTexts = MENU_ITEMS.map((item, index) => {
-      return this.add.text(226, 206 + index * 42, item.label, {
+      const menuText = this.add.text(226, 206 + index * 42, item.label, {
         fontFamily: 'monospace',
         fontSize: '24px',
         color: item.action === 'continue' ? '#8b93a3' : '#ffffff'
       });
+
+      menuText.setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+          this.selectedIndex = index;
+          this.renderMenu();
+          this.confirmSelection();
+        });
+
+      return menuText;
     });
 
     this.messageText = this.add.text(GAME_WIDTH / 2, 394, '', {
@@ -84,14 +94,23 @@ export default class TitleScene extends Phaser.Scene {
 
     this.panelBox = this.add.rectangle(GAME_WIDTH / 2, 292, 456, 214, 0x07111f, 0.96)
       .setStrokeStyle(2, 0xf8f1d8)
-      .setVisible(false);
+      .setVisible(false)
+      .setInteractive();
+
+    this.panelBox.on('pointerdown', () => {
+      if (this.panelMode) this.closePanel();
+    });
 
     this.panelText = this.add.text(116, 200, '', {
       fontFamily: 'monospace',
       fontSize: '18px',
       color: '#ffffff',
       lineSpacing: 8
-    }).setVisible(false);
+    }).setVisible(false).setInteractive();
+
+    this.panelText.on('pointerdown', () => {
+      if (this.panelMode) this.closePanel();
+    });
 
     this.renderMenu();
     this.setupInput();
