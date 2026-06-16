@@ -3,6 +3,7 @@ import { playCancel, playConfirm, playText } from '../audio/sfx.js';
 import { GAME_HEIGHT, GAME_WIDTH, MAP_IDS, SCENE_KEYS, TILE, TILE_SIZE, TILE_TYPES } from '../game/constants.js';
 import { TEXTURE_KEYS } from '../game/pixelTextures.js';
 import { createInitialPlayer } from '../data/player.js';
+import { savePlayer } from '../data/save.js';
 import { getMap } from '../data/maps.js';
 import { getNpcsForMap } from '../data/npcs.js';
 import MessageBox from '../ui/MessageBox.js';
@@ -62,6 +63,7 @@ export default class FieldScene extends Phaser.Scene {
     this.createTouchControls();
     this.showInitialHint();
     this.setupInput();
+    this.persistProgress();
     this.publishDebugState();
   }
 
@@ -293,6 +295,7 @@ export default class FieldScene extends Phaser.Scene {
     this.player.y = target.y;
     this.updatePlayerSprite();
     this.noticeText.setText('');
+    this.persistProgress();
     this.publishDebugState();
 
     this.tryTransitionAt(this.player.x, this.player.y);
@@ -396,6 +399,7 @@ export default class FieldScene extends Phaser.Scene {
     this.player.y = transition.targetY;
     this.player.direction = transition.targetDirection ?? this.player.direction;
 
+    this.persistProgress();
     safelyPlay(playConfirm);
     this.scene.restart({ player: this.player });
   }
@@ -445,6 +449,7 @@ export default class FieldScene extends Phaser.Scene {
       this.statusText.setText(this.getStatusText());
     }
 
+    this.persistProgress();
     this.publishDebugState();
   }
 
@@ -547,6 +552,7 @@ export default class FieldScene extends Phaser.Scene {
     this.player.flags.openedMoonChest = true;
     this.player.flags.gotMoonKey = true;
     this.statusText.setText(this.getStatusText());
+    this.persistProgress();
     safelyPlay(playConfirm);
     this.messageBox.show({
       lines: [
@@ -595,6 +601,7 @@ export default class FieldScene extends Phaser.Scene {
     this.player.flags.openedTowerChest = true;
     this.player.flags.gotBlueOrb = true;
     this.statusText.setText(this.getStatusText());
+    this.persistProgress();
     safelyPlay(playConfirm);
     this.messageBox.show({
       lines: [
@@ -621,6 +628,7 @@ export default class FieldScene extends Phaser.Scene {
     this.player.flags.openedShrineChest = true;
     this.player.flags.gotTideMirror = true;
     this.statusText.setText(this.getStatusText());
+    this.persistProgress();
     safelyPlay(playConfirm);
     this.messageBox.show({
       lines: [
@@ -649,6 +657,7 @@ export default class FieldScene extends Phaser.Scene {
 
     this.player.flags.clearedGame = true;
     this.statusText.setText(this.getStatusText());
+    this.persistProgress();
     safelyPlay(playConfirm);
     this.messageBox.show({
       lines: [
@@ -670,6 +679,10 @@ export default class FieldScene extends Phaser.Scene {
     const mirrorText = this.player.flags.gotTideMirror ? '  \u6f6e\u8def\u306e\u93e1' : '';
     const clearText = this.player.flags.clearedGame ? '  \u591c\u660e\u3051' : '';
     return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0${keyText}${towerText}${orbText}${dawnText}${mirrorText}${clearText}`;
+  }
+
+  persistProgress() {
+    savePlayer(this.player);
   }
 
   getPlayerTexture() {

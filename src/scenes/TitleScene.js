@@ -3,6 +3,7 @@ import { initAudio, playCancel, playConfirm, playCursor } from '../audio/sfx.js'
 import { playBgm, setBgmVolume } from '../audio/bgm.js';
 import { GAME_HEIGHT, GAME_WIDTH, SCENE_KEYS } from '../game/constants.js';
 import { createInitialPlayer } from '../data/player.js';
+import { hasSavedPlayer, loadSavedPlayer } from '../data/save.js';
 
 const MENU_ITEMS = [
   { label: '新しく始める', action: 'newGame' },
@@ -45,6 +46,7 @@ export default class TitleScene extends Phaser.Scene {
     super(SCENE_KEYS.TITLE);
     this.selectedIndex = 0;
     this.panelMode = null;
+    this.hasSave = hasSavedPlayer();
     this.bgmStarted = false;
   }
 
@@ -72,7 +74,7 @@ export default class TitleScene extends Phaser.Scene {
       const menuText = this.add.text(226, 206 + index * 42, item.label, {
         fontFamily: 'monospace',
         fontSize: '24px',
-        color: item.action === 'continue' ? '#8b93a3' : '#ffffff'
+        color: this.getMenuItemColor(item)
       });
 
       menuText.setInteractive({ useHandCursor: true })
@@ -201,8 +203,13 @@ export default class TitleScene extends Phaser.Scene {
     this.menuTexts.forEach((text, index) => {
       const item = MENU_ITEMS[index];
       text.setText(`${index === this.selectedIndex ? '>' : ' '} ${item.label}`);
-      text.setColor(item.action === 'continue' ? '#8b93a3' : '#ffffff');
+      text.setColor(this.getMenuItemColor(item));
     });
+  }
+
+  getMenuItemColor(item) {
+    if (item.action === 'continue' && !this.hasSave) return '#8b93a3';
+    return '#ffffff';
   }
 
   confirmSelection() {
@@ -215,8 +222,15 @@ export default class TitleScene extends Phaser.Scene {
     }
 
     if (item.action === 'continue') {
-      this.messageText.setText('記録がありません。');
-      safelyPlay(playCancel);
+      const savedPlayer = loadSavedPlayer();
+      if (!savedPlayer) {
+        this.messageText.setText('記録がありません。');
+        safelyPlay(playCancel);
+        return;
+      }
+
+      safelyPlay(playConfirm);
+      this.scene.start(SCENE_KEYS.FIELD, { player: savedPlayer });
       return;
     }
 
