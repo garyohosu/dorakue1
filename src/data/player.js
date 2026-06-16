@@ -23,7 +23,9 @@ export const INITIAL_PLAYER = {
     gotDawnMark: false,
     openedShrineDoor: false,
     gotTideMirror: false,
-    openedShrineChest: false
+    openedShrineChest: false,
+    openedFinalPath: false,
+    clearedGame: false
   }
 };
 

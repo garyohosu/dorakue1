@@ -334,6 +334,11 @@ export default class FieldScene extends Phaser.Scene {
       return true;
     }
 
+    if (tileId === TILE.ALTAR && this.map.id === MAP_IDS.FINAL) {
+      this.completeFinalAltar();
+      return true;
+    }
+
     return false;
   }
 
@@ -447,6 +452,13 @@ export default class FieldScene extends Phaser.Scene {
     if (this.getTileAt(x, y) === TILE.CHEST) {
       this.noticeText.setText('\u5b9d\u7bb1\u306f\u6c7a\u5b9a\u30ad\u30fc\u3067\u8abf\u3079\u3089\u308c\u308b\u3002');
       this.showTileMarker(x, y, 0xfff2b0, 0.28);
+      this.publishDebugState();
+      return;
+    }
+
+    if (this.getTileAt(x, y) === TILE.ALTAR) {
+      this.noticeText.setText('\u796d\u58c7\u306f\u6c7a\u5b9a\u30ad\u30fc\u3067\u8abf\u3079\u3089\u308c\u308b\u3002');
+      this.showTileMarker(x, y, 0xd25c8b, 0.3);
       this.publishDebugState();
       return;
     }
@@ -620,13 +632,44 @@ export default class FieldScene extends Phaser.Scene {
     this.publishDebugState();
   }
 
+  completeFinalAltar() {
+    this.noticeText.setText('');
+
+    if (this.player.flags.clearedGame) {
+      safelyPlay(playConfirm);
+      this.messageBox.show({
+        lines: [
+          '\u767d\u9418\u306f\u9759\u304b\u306b\u671d\u3092\u544a\u3052\u3066\u3044\u308b\u3002',
+          '\u30ea\u30e5\u30df\u30ca\u306e\u65c5\u306f\u3001\u3059\u3067\u306b\u591c\u660e\u3051\u3092\u8fce\u3048\u305f\u3002'
+        ]
+      });
+      this.publishDebugState();
+      return;
+    }
+
+    this.player.flags.clearedGame = true;
+    this.statusText.setText(this.getStatusText());
+    safelyPlay(playConfirm);
+    this.messageBox.show({
+      lines: [
+        '\u6f6e\u8def\u306e\u93e1\u304c\u95c7\u306e\u796d\u58c7\u306b\u671d\u306e\u5149\u3092\u8fd4\u3057\u305f\u3002',
+        '\u9ed2\u3044\u9727\u306f\u6d77\u3078\u3068\u307b\u3069\u3051\u3001\u9060\u304f\u767d\u9418\u304c\u9cf4\u308a\u59cb\u3081\u308b\u3002',
+        '\u9577\u3044\u591c\u306f\u7d42\u308f\u3063\u305f\u3002',
+        '\u30a2\u30ec\u30f3\u306e\u65c5\u306f\u3001\u671d\u306e\u5c0f\u5f84\u306b\u8a9e\u308a\u7d99\u304c\u308c\u308b\u3002',
+        'THE END'
+      ]
+    });
+    this.publishDebugState();
+  }
+
   getStatusText() {
     const keyText = this.player.flags.gotMoonKey ? '  \u6708\u7d0b\u306e\u9375' : '';
     const towerText = this.player.flags.openedTowerDoor ? '  \u5854\u958b\u9580' : '';
     const orbText = this.player.flags.gotBlueOrb ? '  \u9752\u706f\u306e\u73e0' : '';
     const dawnText = this.player.flags.gotDawnMark ? '  \u671d\u9727\u306e\u5370' : '';
     const mirrorText = this.player.flags.gotTideMirror ? '  \u6f6e\u8def\u306e\u93e1' : '';
-    return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0${keyText}${towerText}${orbText}${dawnText}${mirrorText}`;
+    const clearText = this.player.flags.clearedGame ? '  \u591c\u660e\u3051' : '';
+    return `\u73fe\u5728\u5730: ${this.map.name}  ${this.player.name}  Lv ${this.player.level}  HP ${this.player.hp}/${this.player.maxHp}  MP ${this.player.mp}/${this.player.maxMp}  ${this.player.gold}\u30ea\u30e0${keyText}${towerText}${orbText}${dawnText}${mirrorText}${clearText}`;
   }
 
   getPlayerTexture() {

@@ -12,6 +12,7 @@ export const TEXTURE_KEYS = {
   TILE_WALL: 'tile_wall',
   TILE_EXIT: 'tile_exit',
   TILE_CHEST: 'tile_chest',
+  TILE_ALTAR: 'tile_altar',
   TILE_THRONE: 'tile_throne',
   TILE_HOUSE_FLOOR: 'tile_house_floor',
   LOCATION_CASTLE: 'location_castle',
@@ -19,6 +20,7 @@ export const TEXTURE_KEYS = {
   LOCATION_CAVE: 'location_cave',
   LOCATION_TOWER: 'location_tower',
   LOCATION_SHRINE: 'location_shrine',
+  LOCATION_FINAL: 'location_final',
   NPC_KING: 'npc_king',
   NPC_KEEPER: 'npc_keeper',
   NPC_GUARD: 'npc_guard',
@@ -39,6 +41,7 @@ export function registerPixelTextures(scene) {
   createTexture(scene, TEXTURE_KEYS.TILE_WALL, drawWall);
   createTexture(scene, TEXTURE_KEYS.TILE_EXIT, drawExit);
   createTexture(scene, TEXTURE_KEYS.TILE_CHEST, drawChest);
+  createTexture(scene, TEXTURE_KEYS.TILE_ALTAR, drawAltar);
   createTexture(scene, TEXTURE_KEYS.TILE_THRONE, drawThrone);
   createTexture(scene, TEXTURE_KEYS.TILE_HOUSE_FLOOR, drawHouseFloor);
   createTexture(scene, TEXTURE_KEYS.LOCATION_CASTLE, drawCastle);
@@ -46,6 +49,7 @@ export function registerPixelTextures(scene) {
   createTexture(scene, TEXTURE_KEYS.LOCATION_CAVE, drawCave);
   createTexture(scene, TEXTURE_KEYS.LOCATION_TOWER, drawTower);
   createTexture(scene, TEXTURE_KEYS.LOCATION_SHRINE, drawShrine);
+  createTexture(scene, TEXTURE_KEYS.LOCATION_FINAL, drawFinalCape);
   createTexture(scene, TEXTURE_KEYS.PLAYER_DOWN, (ctx) => drawPlayer(ctx, 'down'));
   createTexture(scene, TEXTURE_KEYS.PLAYER_UP, (ctx) => drawPlayer(ctx, 'up'));
   createTexture(scene, TEXTURE_KEYS.PLAYER_LEFT, (ctx) => drawPlayer(ctx, 'left'));
@@ -206,6 +210,17 @@ function drawChest(ctx) {
   rect(ctx, 9, 24, 14, 3, '#3b2418');
 }
 
+function drawAltar(ctx) {
+  drawFloor(ctx);
+  rect(ctx, 7, 23, 18, 4, '#242a35');
+  rect(ctx, 9, 18, 14, 6, '#3b4150');
+  rect(ctx, 11, 13, 10, 6, '#5f6674');
+  rect(ctx, 14, 8, 4, 7, '#111827');
+  rect(ctx, 13, 6, 6, 3, '#6f3a56');
+  rect(ctx, 15, 4, 2, 2, '#d25c8b');
+  rect(ctx, 10, 20, 12, 2, '#d8be63');
+}
+
 function drawThrone(ctx) {
   drawFloor(ctx);
   rect(ctx, 8, 7, 16, 20, '#71404a');
@@ -289,6 +304,17 @@ function drawShrine(ctx) {
   rect(ctx, 21, 20, 3, 4, '#eef1ec');
   rect(ctx, 15, 12, 2, 2, '#f1d070');
   rect(ctx, 2, 28, 28, 2, '#8ac9eb');
+}
+
+function drawFinalCape(ctx) {
+  drawWater(ctx);
+  rect(ctx, 3, 21, 26, 8, '#20242d');
+  rect(ctx, 6, 15, 20, 8, '#323844');
+  rect(ctx, 9, 10, 14, 7, '#454c5a');
+  rect(ctx, 12, 7, 8, 5, '#111827');
+  rect(ctx, 15, 3, 2, 5, '#8f2f57');
+  rect(ctx, 12, 23, 8, 4, '#07090d');
+  rect(ctx, 6, 27, 20, 2, '#6a3a5b');
 }
 
 function drawHouse(ctx, x, y, roof, wall) {

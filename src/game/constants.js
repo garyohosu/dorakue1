@@ -14,7 +14,8 @@ export const MAP_IDS = {
   TOWN: 'town',
   CAVE: 'cave',
   TOWER: 'tower',
-  SHRINE: 'shrine'
+  SHRINE: 'shrine',
+  FINAL: 'final'
 };
 
 export const TILE = {
@@ -28,10 +29,12 @@ export const TILE = {
   CAVE: 'cave',
   TOWER: 'tower',
   SHRINE: 'shrine',
+  FINAL: 'final',
   FLOOR: 'floor',
   WALL: 'wall',
   EXIT: 'exit',
   CHEST: 'chest',
+  ALTAR: 'altar',
   THRONE: 'throne',
   HOUSE_FLOOR: 'house_floor'
 };
@@ -87,6 +90,11 @@ export const TILE_TYPES = {
     textureKey: 'location_shrine',
     passable: true
   },
+  [TILE.FINAL]: {
+    label: '\u9ed2\u3044\u5cac',
+    textureKey: 'location_final',
+    passable: true
+  },
   [TILE.FLOOR]: {
     label: '\u5e8a',
     textureKey: 'tile_floor',
@@ -105,6 +113,11 @@ export const TILE_TYPES = {
   [TILE.CHEST]: {
     label: '\u5b9d\u7bb1',
     textureKey: 'tile_chest',
+    passable: false
+  },
+  [TILE.ALTAR]: {
+    label: '\u95c7\u306e\u796d\u58c7',
+    textureKey: 'tile_altar',
     passable: false
   },
   [TILE.THRONE]: {
