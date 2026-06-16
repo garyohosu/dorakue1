@@ -813,7 +813,8 @@ export default class FieldScene extends Phaser.Scene {
       })),
       dialog: {
         open: this.messageBox?.isOpen() ?? false,
-        speaker: this.messageBox?.speaker ?? ''
+        speaker: this.messageBox?.speaker ?? '',
+        line: this.messageBox?.lines?.[this.messageBox.currentIndex] ?? ''
       },
       notice: this.noticeText?.text ?? ''
     };

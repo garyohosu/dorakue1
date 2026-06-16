@@ -67,3 +67,90 @@ test('shows touch controls on mobile viewport', async ({ page, isMobile }) => {
   const debugState = await page.evaluate(() => window.__dorakueDebug);
   expect(debugState.mapId).toBe('world');
 });
+
+test('continues from a prepared save and reaches THE END', async ({ page }) => {
+  const preparedPlayer = {
+    name: 'アレン',
+    level: 6,
+    exp: 0,
+    nextExp: 70,
+    hp: 62,
+    maxHp: 62,
+    mp: 16,
+    maxMp: 16,
+    attack: 20,
+    defense: 8,
+    gold: 120,
+    herbs: 5,
+    mapId: 'final',
+    x: 10,
+    y: 2,
+    direction: 'up',
+    flags: {
+      acceptedQuest: true,
+      seenInitialHint: true,
+      gotMoonKey: true,
+      openedMoonChest: true,
+      openedTowerDoor: true,
+      gotBlueOrb: true,
+      openedTowerChest: true,
+      gotDawnMark: true,
+      openedShrineDoor: true,
+      gotTideMirror: true,
+      openedShrineChest: true,
+      openedFinalPath: true,
+      defeatedFinalBoss: false,
+      clearedGame: false
+    }
+  };
+
+  await page.addInitScript((player) => {
+    localStorage.setItem('dorakue1.save.v1', JSON.stringify({
+      version: 1,
+      savedAt: new Date().toISOString(),
+      player
+    }));
+  }, preparedPlayer);
+
+  await page.goto('/');
+  await expect(page.locator('canvas')).toBeVisible();
+  await expect.poll(async () => {
+    return page.evaluate(() => localStorage.getItem('dorakue1.save.v1') !== null);
+  }).toBe(true);
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__dorakueTitleDebug?.hasSave ?? false);
+  }).toBe(true);
+  await page.keyboard.press('ArrowDown');
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__dorakueTitleDebug?.selectedAction ?? '');
+  }).toBe('continue');
+  await page.keyboard.press('Enter');
+
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__dorakueDebug?.mapId ?? '');
+  }).toBe('final');
+
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__dorakueDebug?.dialog?.speaker ?? '');
+  }).toBe('黒鐘の王');
+
+  for (let index = 0; index < 40; index += 1) {
+    let debugState = await page.evaluate(() => window.__dorakueDebug);
+    if (debugState?.dialog?.line === 'THE END') break;
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(30);
+    debugState = await page.evaluate(() => window.__dorakueDebug);
+    if (debugState?.dialog?.line === 'THE END') break;
+  }
+
+  await expect.poll(async () => {
+    return page.evaluate(() => window.__dorakueDebug?.dialog?.line ?? '');
+  }).toBe('THE END');
+
+  const debugState = await page.evaluate(() => window.__dorakueDebug);
+  expect(debugState.flags).toMatchObject({
+    defeatedFinalBoss: true,
+    clearedGame: true
+  });
+});

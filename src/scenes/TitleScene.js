@@ -53,6 +53,7 @@ export default class TitleScene extends Phaser.Scene {
   create() {
     this.selectedIndex = 0;
     this.panelMode = null;
+    this.hasSave = hasSavedPlayer();
 
     this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x101826).setOrigin(0);
     this.add.rectangle(0, 0, GAME_WIDTH, 92, 0x172335).setOrigin(0);
@@ -117,6 +118,7 @@ export default class TitleScene extends Phaser.Scene {
     this.renderMenu();
     this.setupInput();
     this.setupAudioUnlock();
+    this.publishDebugState();
   }
 
   setupInput() {
@@ -196,6 +198,7 @@ export default class TitleScene extends Phaser.Scene {
     this.selectedIndex = (this.selectedIndex + delta + MENU_ITEMS.length) % MENU_ITEMS.length;
     this.messageText.setText('');
     this.renderMenu();
+    this.publishDebugState();
     safelyPlay(playCursor);
   }
 
@@ -205,6 +208,7 @@ export default class TitleScene extends Phaser.Scene {
       text.setText(`${index === this.selectedIndex ? '>' : ' '} ${item.label}`);
       text.setColor(this.getMenuItemColor(item));
     });
+    this.publishDebugState();
   }
 
   getMenuItemColor(item) {
@@ -225,6 +229,7 @@ export default class TitleScene extends Phaser.Scene {
       const savedPlayer = loadSavedPlayer();
       if (!savedPlayer) {
         this.messageText.setText('記録がありません。');
+        this.publishDebugState();
         safelyPlay(playCancel);
         return;
       }
@@ -251,12 +256,25 @@ export default class TitleScene extends Phaser.Scene {
     this.panelBox.setVisible(true);
     this.panelText.setText(text).setVisible(true);
     this.messageText.setText('');
+    this.publishDebugState();
   }
 
   closePanel() {
     this.panelMode = null;
     this.panelBox.setVisible(false);
     this.panelText.setVisible(false);
+    this.publishDebugState();
     safelyPlay(playCancel);
+  }
+
+  publishDebugState() {
+    window.__dorakueTitleDebug = {
+      scene: 'TitleScene',
+      selectedIndex: this.selectedIndex,
+      selectedAction: MENU_ITEMS[this.selectedIndex]?.action ?? '',
+      hasSave: this.hasSave,
+      panelMode: this.panelMode,
+      message: this.messageText?.text ?? ''
+    };
   }
 }
