@@ -130,7 +130,12 @@ export default class FieldScene extends Phaser.Scene {
       color: '#fff2b0',
       backgroundColor: '#05070dcc',
       padding: { x: 10, y: 4 }
-    }).setOrigin(0.5).setDepth(30);
+    }).setOrigin(0.5).setDepth(30).setVisible(false);
+  }
+
+  setNotice(text) {
+    this.noticeText.setText(text);
+    this.noticeText.setVisible(text.length > 0);
   }
 
   setupMessageTouch() {
@@ -294,7 +299,7 @@ export default class FieldScene extends Phaser.Scene {
     this.player.x = target.x;
     this.player.y = target.y;
     this.updatePlayerSprite();
-    this.noticeText.setText('');
+    this.setNotice('');
     this.persistProgress();
     this.publishDebugState();
 
@@ -375,7 +380,7 @@ export default class FieldScene extends Phaser.Scene {
 
   showTransitionBlocked(transition, x, y) {
     safelyPlay(playCancel);
-    this.noticeText.setText(transition.missingMessage ?? '\u307e\u3060\u3053\u3053\u306b\u306f\u5165\u308c\u306a\u3044\u3002');
+    this.setNotice(transition.missingMessage ?? '\u307e\u3060\u3053\u3053\u306b\u306f\u5165\u308c\u306a\u3044\u3002');
     this.showTileMarker(x, y, 0xfff2b0, 0.3);
     this.publishDebugState();
   }
@@ -407,7 +412,7 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   startNpcConversation(npc) {
-    this.noticeText.setText('');
+    this.setNotice('');
     safelyPlay(playConfirm);
     this.messageBox.show({
       speaker: npc.name,
@@ -492,26 +497,26 @@ export default class FieldScene extends Phaser.Scene {
 
   showBlocked(x, y) {
     if (this.getTileAt(x, y) === TILE.CHEST) {
-      this.noticeText.setText('\u5b9d\u7bb1\u306f\u6c7a\u5b9a\u30ad\u30fc\u3067\u8abf\u3079\u3089\u308c\u308b\u3002');
+      this.setNotice('\u5b9d\u7bb1\u306f\u6c7a\u5b9a\u30ad\u30fc\u3067\u8abf\u3079\u3089\u308c\u308b\u3002');
       this.showTileMarker(x, y, 0xfff2b0, 0.28);
       this.publishDebugState();
       return;
     }
 
     if (this.getTileAt(x, y) === TILE.ALTAR) {
-      this.noticeText.setText('\u796d\u58c7\u306f\u6c7a\u5b9a\u30ad\u30fc\u3067\u8abf\u3079\u3089\u308c\u308b\u3002');
+      this.setNotice('\u796d\u58c7\u306f\u6c7a\u5b9a\u30ad\u30fc\u3067\u8abf\u3079\u3089\u308c\u308b\u3002');
       this.showTileMarker(x, y, 0xd25c8b, 0.3);
       this.publishDebugState();
       return;
     }
 
-    this.noticeText.setText('\u305d\u3053\u3078\u306f\u9032\u3081\u306a\u3044\u3002');
+    this.setNotice('\u305d\u3053\u3078\u306f\u9032\u3081\u306a\u3044\u3002');
     this.showTileMarker(x, y, 0xffffff, 0.22);
     this.publishDebugState();
   }
 
   showNpcPrompt(x, y) {
-    this.noticeText.setText('\u8a71\u3057\u304b\u3051\u308b\u306b\u306f\u6c7a\u5b9a\u30ad\u30fc\u3092\u62bc\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
+    this.setNotice('\u8a71\u3057\u304b\u3051\u308b\u306b\u306f\u6c7a\u5b9a\u30ad\u30fc\u3092\u62bc\u3057\u3066\u304f\u3060\u3055\u3044\u3002');
     this.showTileMarker(x, y, 0xfff2b0, 0.28);
     this.publishDebugState();
   }
@@ -570,7 +575,7 @@ export default class FieldScene extends Phaser.Scene {
   showInitialHint() {
     if (this.player.flags.acceptedQuest || this.player.flags.seenInitialHint) return;
 
-    this.noticeText.setText('\u738b\u306b\u8a71\u3057\u304b\u3051\u3066\u304f\u3060\u3055\u3044\u3002');
+    this.setNotice('\u738b\u306b\u8a71\u3057\u304b\u3051\u3066\u304f\u3060\u3055\u3044\u3002');
     this.player.flags.seenInitialHint = true;
   }
 
@@ -612,7 +617,7 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   openMoonChest() {
-    this.noticeText.setText('');
+    this.setNotice('');
 
     if (this.player.flags.openedMoonChest) {
       safelyPlay(playCancel);
@@ -661,7 +666,7 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   openTowerChest() {
-    this.noticeText.setText('');
+    this.setNotice('');
 
     if (this.player.flags.openedTowerChest) {
       safelyPlay(playCancel);
@@ -688,7 +693,7 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   openShrineChest() {
-    this.noticeText.setText('');
+    this.setNotice('');
 
     if (!this.player.flags.openedShrineChest) {
       this.player.flags.openedShrineChest = true;
@@ -744,7 +749,7 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   completeFinalAltar() {
-    this.noticeText.setText('');
+    this.setNotice('');
 
     if (this.player.flags.clearedGame) {
       safelyPlay(playConfirm);
