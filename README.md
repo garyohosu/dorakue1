@@ -1,66 +1,85 @@
-# dorakue1
+# dorakue1 — 暁の小径 / Path of Dawn
 
-`dorakue1` is a small browser RPG prototype built with Phaser, Vite, and JavaScript.
+## これは何？
 
-The game title is **暁の小径 / Path of Dawn**. It is an AI-assisted development experiment for testing whether a classic single-player RPG in the spirit of early console RPGs can be specified, implemented, reviewed, and tested through iterative natural-language coding workflows.
+**「プログラミングを知らなくても、今のAIならドラクエ1くらいのゲームが作れる？」**
 
-## Requirements
+この疑問を実際に試してみた実験リポジトリです。
 
-- Node.js
-- npm
+AIとの自然言語でのやり取り（「こういうゲームにして」「このバグを直して」）だけを使い、レトロRPGを仕上げられるかどうかを検証しました。使ったのは [Claude Code](https://claude.ai/code)（Anthropic社のAIコーディングツール）です。
 
-## Setup
+ゲーム自体は Phaser（ブラウザ向けゲームエンジン）と JavaScript で動いていますが、**コードの中身は知らなくても大丈夫**です。
+
+---
+
+## ゲームの内容
+
+タイトル：**暁の小径**
+
+- フィールドマップを歩いて探索
+- 敵とのターン制バトル
+- 街でNPCと会話・装備購入
+- ラスボスを倒してエンディングへ
+
+ドラクエ1をイメージした、シンプルなブラウザRPGです。
+
+---
+
+## 動かし方
+
+### 1. 必要なもの
+
+- [Node.js](https://nodejs.org/ja/) （インストールしていない場合は公式サイトからダウンロード）
+
+### 2. セットアップ
+
+ターミナル（コマンドプロンプト / PowerShell）を開いて以下を実行します。
 
 ```bash
 npm install
 ```
 
-## Development
-
-Start the local Vite dev server:
+### 3. ゲームを起動する
 
 ```bash
 npm run dev
 ```
 
-Build the game:
+起動したらブラウザで `http://localhost:5173` を開くと遊べます。
 
-```bash
-npm run build
+---
+
+## その他のコマンド
+
+| コマンド | 内容 |
+|---|---|
+| `npm run build` | 公開用ファイルを生成する |
+| `npm run preview` | 公開用ビルドを確認する |
+| `npm test` | ゲームのシナリオ検証スクリプトを実行 |
+| `npm run test:browser` | ブラウザ自動テストを実行（Playwright） |
+
+---
+
+## フォルダ構成（参考）
+
+```
+src/
+  scenes/   … 各画面（フィールド・バトル・街など）
+  data/     … マップ・NPC・バトル・セーブデータ
+  game/     … 定数・設定・テクスチャ生成
+  ui/       … メッセージウィンドウなどUI部品
+tests/      … 自動テスト（Playwright）
+scripts/    … 検証スクリプト
+spec.md     … ゲーム仕様書
+code_review.md … AIによるレビューメモ
 ```
 
-Preview the production build:
+---
 
-```bash
-npm run preview
-```
+## 実験の結論（途中経過）
 
-## Tests
+- AIへの指示だけでゲームの大枠は作れる
+- 細かいバグの修正や仕様の調整は、何度も会話を重ねることで対処できる
+- 「プログラミングゼロ」は言いすぎだが、**深い知識なしでもゲームを形にすることは可能**だった
 
-Run the gameplay validation script:
-
-```bash
-npm test
-```
-
-Run the Playwright browser smoke tests:
-
-```bash
-npm run test:browser
-```
-
-## Project Structure
-
-- `src/` - game source code
-- `src/scenes/` - Phaser scenes
-- `src/data/` - maps, player data, NPCs, battle data, and save handling
-- `src/game/` - constants, config, and generated pixel textures
-- `src/ui/` - UI components such as the message box
-- `tests/` - Playwright smoke tests
-- `scripts/` - validation scripts
-- `spec.md` - full game specification
-- `code_review.md` - review notes comparing the implementation with the specification
-
-## Notes
-
-The current implementation is an MVP-style playable prototype. Some systems in `spec.md` are intentionally incomplete or simplified, and the known gaps are tracked in `code_review.md`.
+詳しい実装とレビューの記録は `spec.md` と `code_review.md` を参照してください。
