@@ -48,6 +48,7 @@ export default class FieldScene extends Phaser.Scene {
 
   create(data = {}) {
     this.nextMoveAt = 0;
+    this.tileImages = [];
     this.player = this.createPlayerState(data.player);
     this.map = getMap(this.player.mapId);
     this.npcs = getNpcsForMap(this.map.id);
@@ -83,18 +84,39 @@ export default class FieldScene extends Phaser.Scene {
   }
 
   drawMap() {
+    this.tileImages.forEach((obj) => { if (obj?.active) obj.destroy(); });
+    this.tileImages = [];
+
     this.map.tiles.forEach((row, y) => {
       row.forEach((tileId, x) => {
+        if (this.map.id === MAP_IDS.WORLD && tileId === TILE.EXIT) return;
+
         const tile = TILE_TYPES[tileId];
+        if (!tile) {
+          console.warn(`Unknown tile "${tileId}" at (${x},${y}) in map "${this.map.id}"`);
+          return;
+        }
+
         const px = x * TILE_SIZE;
         const py = y * TILE_SIZE;
 
-        this.add.image(px, py, tile.textureKey).setOrigin(0);
-        this.add.rectangle(px, py, TILE_SIZE, TILE_SIZE, 0x000000, 0)
-          .setOrigin(0)
-          .setStrokeStyle(1, 0x111827, 0.2);
+        this.tileImages.push(this.add.image(px, py, tile.textureKey).setOrigin(0));
+        this.tileImages.push(
+          this.add.rectangle(px, py, TILE_SIZE, TILE_SIZE, 0x000000, 0)
+            .setOrigin(0)
+            .setStrokeStyle(1, 0x111827, 0.2)
+        );
       });
     });
+  }
+
+  clearMapObjects() {
+    this.tileImages.forEach((obj) => { if (obj?.active) obj.destroy(); });
+    this.tileImages = [];
+    if (this.npcSprites) {
+      this.npcSprites.forEach((sprite) => { if (sprite?.active) sprite.destroy(); });
+      this.npcSprites = [];
+    }
   }
 
   drawNpcs() {
@@ -408,6 +430,7 @@ export default class FieldScene extends Phaser.Scene {
 
     this.persistProgress();
     safelyPlay(playConfirm);
+    this.clearMapObjects();
     this.scene.restart({ player: this.player });
   }
 
@@ -613,6 +636,7 @@ export default class FieldScene extends Phaser.Scene {
     this.player.y = 13;
     this.player.direction = 'up';
     this.persistProgress();
+    this.clearMapObjects();
     this.scene.restart({ player: this.player });
   }
 
